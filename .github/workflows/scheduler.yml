@@ -1,0 +1,21 @@
+name: Scheduled Publish Pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+
+jobs:
+  trigger-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger publish API
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail --show-error --location \
+            --request POST "$APP_URL/api/post" \
+            --header "Authorization: Bearer $CRON_SECRET" \
+            --header "Content-Type: application/json" \
+            --data '{"topic":"AI agents for creator growth"}'
