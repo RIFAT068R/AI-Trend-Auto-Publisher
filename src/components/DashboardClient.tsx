@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
-import type { ApiResponse, GeneratedMetadata, GeneratedPostPreview, HistoryPost, PipelineResult, SystemStatus, TrendTopic } from "@/lib/types";
+import type { ApiResponse, GeneratedImagePreview, GeneratedMetadata, HistoryPost, PipelineResult, SystemStatus, TrendTopic } from "@/lib/types";
 
 type DashboardClientProps = {
   initialTrends: TrendTopic[];
@@ -22,6 +23,7 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
   const [posts, setPosts] = useState(initialPosts);
   const [systemStatus, setSystemStatus] = useState(initialSystemStatus);
   const [preview, setPreview] = useState<GeneratedMetadata | null>(null);
+  const [previewImage, setPreviewImage] = useState<GeneratedImagePreview | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<ActionState>({
@@ -99,6 +101,17 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
       }
 
       setPreview(payload.data);
+      const imageResponse = await fetch("/api/image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ imagePrompt: payload.data.imagePrompt })
+      });
+      const imagePayload = (await imageResponse.json()) as ApiResponse<GeneratedImagePreview>;
+      if (imageResponse.ok && imagePayload.ok) {
+        setPreviewImage(imagePayload.data);
+      }
       setMessage(`Generated metadata for ${topic}.`);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "Failed to generate post."));
@@ -133,6 +146,7 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
         category: payload.data.preview.category,
         imagePrompt: payload.data.preview.imagePrompt
       });
+      setPreviewImage(payload.data.image);
       setPosts((currentPosts) => [payload.data.post, ...currentPosts]);
       setTrends((currentTrends) => currentTrends.filter((trend) => trend.id !== payload.data.trend.id));
       setSystemStatus((currentStatus) => ({
@@ -251,6 +265,13 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
                 <span className="info-label">Image prompt</span>
                 <p>{latestPreview.imagePrompt}</p>
               </div>
+
+              {previewImage ? (
+                <div className="info-panel">
+                  <span className="info-label">Generated image</span>
+                  <Image src={previewImage.imageUrl} alt={previewImage.alt} className="preview-image-display" width={320} height={320} unoptimized />
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="empty-state">
@@ -262,7 +283,7 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
       </section>
 
       <section className="dashboard-grid-two dashboard-grid-bottom">
-        <Card title="Recent Activity" description="Draft posts saved to local JSON storage." className="dashboard-card">
+        <Card title="Recent Activity" description="Draft posts saved to Supabase." className="dashboard-card">
           <div className="list-stack">
             {recentActivity.map((post) => (
               <article key={post.id} className="list-row activity-row">

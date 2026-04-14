@@ -443,6 +443,26 @@ img {
   letter-spacing: -0.01em;
 }
 
+.preview-image-display,
+.history-image-thumb {
+  width: 100%;
+  max-width: 320px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-muted);
+  object-fit: cover;
+}
+
+.preview-image-display {
+  margin-top: 4px;
+}
+
+.history-image-thumb {
+  margin-top: 8px;
+  max-width: 140px;
+  aspect-ratio: 1 / 1;
+}
+
 .empty-state {
   display: grid;
   gap: 8px;

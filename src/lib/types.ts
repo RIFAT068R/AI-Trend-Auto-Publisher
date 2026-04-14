@@ -49,7 +49,8 @@ export type GeneratedImagePreview = {
   prompt: string;
   imageUrl: string;
   alt: string;
-  provider: "placeholder" | "remote";
+  provider: "placeholder" | "remote" | "cloudflare";
+  base64?: string;
 };
 
 export type HistoryPostStatus = "draft" | "scheduled" | "published";
