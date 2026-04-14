@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { generatePostPreview } from "@/lib/ai";
-import type { ApiResponse, GeneratedPostPreview } from "@/lib/types";
+import { generateMetadata } from "@/lib/ai";
+import type { ApiResponse, GeneratedMetadata } from "@/lib/types";
 
 function getTopicFromRequest(request: Request) {
   const url = new URL(request.url);
@@ -9,23 +9,23 @@ function getTopicFromRequest(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const preview = await generatePostPreview(getTopicFromRequest(request));
+    const metadata = await generateMetadata(getTopicFromRequest(request));
 
-    return NextResponse.json<ApiResponse<GeneratedPostPreview>>(
+    return NextResponse.json<ApiResponse<GeneratedMetadata>>(
       {
         ok: true,
-        data: preview
+        data: metadata
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Failed to generate preview", error);
-    const preview = await generatePostPreview("AI Tools");
+    const metadata = await generateMetadata("AI Tools");
 
-    return NextResponse.json<ApiResponse<GeneratedPostPreview>>(
+    return NextResponse.json<ApiResponse<GeneratedMetadata>>(
       {
         ok: true,
-        data: preview
+        data: metadata
       },
       { status: 200 }
     );
@@ -35,23 +35,23 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = (await request.json().catch(() => ({}))) as { topic?: string };
-    const preview = await generatePostPreview(body.topic);
+    const metadata = await generateMetadata(body.topic);
 
-    return NextResponse.json<ApiResponse<GeneratedPostPreview>>(
+    return NextResponse.json<ApiResponse<GeneratedMetadata>>(
       {
         ok: true,
-        data: preview
+        data: metadata
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Failed to generate preview", error);
-    const preview = await generatePostPreview("AI Tools");
+    const metadata = await generateMetadata("AI Tools");
 
-    return NextResponse.json<ApiResponse<GeneratedPostPreview>>(
+    return NextResponse.json<ApiResponse<GeneratedMetadata>>(
       {
         ok: true,
-        data: preview
+        data: metadata
       },
       { status: 200 }
     );

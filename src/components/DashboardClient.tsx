@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
-import type { ApiResponse, GeneratedPostPreview, HistoryPost, PipelineResult, SystemStatus, TrendTopic } from "@/lib/types";
+import type { ApiResponse, GeneratedMetadata, GeneratedPostPreview, HistoryPost, PipelineResult, SystemStatus, TrendTopic } from "@/lib/types";
 
 type DashboardClientProps = {
   initialTrends: TrendTopic[];
@@ -21,7 +21,7 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
   const [trends, setTrends] = useState(initialTrends);
   const [posts, setPosts] = useState(initialPosts);
   const [systemStatus, setSystemStatus] = useState(initialSystemStatus);
-  const [preview, setPreview] = useState<GeneratedPostPreview | null>(null);
+  const [preview, setPreview] = useState<GeneratedMetadata | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<ActionState>({
@@ -92,14 +92,14 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
         body: JSON.stringify({ topic })
       });
 
-      const payload = (await response.json()) as ApiResponse<GeneratedPostPreview>;
+      const payload = (await response.json()) as ApiResponse<GeneratedMetadata>;
 
       if (!response.ok || !payload.ok) {
         throw new Error(payload.ok ? "Failed to generate post preview." : payload.error.message);
       }
 
       setPreview(payload.data);
-      setMessage(`Generated draft for ${payload.data.topic}.`);
+      setMessage(`Generated metadata for ${topic}.`);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "Failed to generate post."));
     } finally {
@@ -126,7 +126,13 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
         throw new Error(payload.ok ? "Pipeline failed." : payload.error.message);
       }
 
-      setPreview(payload.data.preview);
+      setPreview({
+        hook: payload.data.preview.hook,
+        caption: payload.data.preview.caption,
+        hashtags: payload.data.preview.hashtags,
+        category: payload.data.preview.category,
+        imagePrompt: payload.data.preview.imagePrompt
+      });
       setPosts((currentPosts) => [payload.data.post, ...currentPosts]);
       setTrends((currentTrends) => currentTrends.filter((trend) => trend.id !== payload.data.trend.id));
       setSystemStatus((currentStatus) => ({
@@ -218,11 +224,6 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
         <Card title="Generated Post Preview" description="Latest generated metadata ready for image and draft storage." className="dashboard-card">
           {latestPreview ? (
             <div className="preview-stack">
-              <div className="content-box subtle-surface">
-                <h3>{latestPreview.title}</h3>
-                <p>{latestPreview.summary}</p>
-              </div>
-
               <div className="info-panel">
                 <span className="info-label">Hook</span>
                 <strong>{latestPreview.hook}</strong>
@@ -242,8 +243,13 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
               </div>
 
               <div className="info-panel">
-                <span className="info-label">Next action</span>
-                <strong>{latestPreview.callToAction}</strong>
+                <span className="info-label">Category</span>
+                <strong>{latestPreview.category}</strong>
+              </div>
+
+              <div className="info-panel">
+                <span className="info-label">Image prompt</span>
+                <p>{latestPreview.imagePrompt}</p>
               </div>
             </div>
           ) : (

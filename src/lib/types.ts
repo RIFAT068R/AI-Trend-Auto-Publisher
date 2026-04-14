@@ -37,6 +37,14 @@ export type GeneratedPostPreview = {
   callToAction: string;
 };
 
+export type GeneratedMetadata = {
+  hook: string;
+  caption: string;
+  hashtags: string[];
+  category: string;
+  imagePrompt: string;
+};
+
 export type GeneratedImagePreview = {
   prompt: string;
   imageUrl: string;
