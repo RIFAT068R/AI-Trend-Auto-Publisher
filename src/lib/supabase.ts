@@ -1,69 +1,96 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-let supabaseClient: SupabaseClient | null | undefined;
+let serverSupabaseClient: SupabaseClient | null | undefined;
+let browserSupabaseClient: SupabaseClient | null | undefined;
 
 function sanitizeEnvValue(value?: string) {
   return value?.trim().replace(/^['"]|['"]$/g, "") ?? "";
 }
 
-function resolveSupabaseEnv() {
-  const candidates = [
-    {
-      url: sanitizeEnvValue(process.env.SUPABASE_URL),
-      key: sanitizeEnvValue(process.env.SUPABASE_ANON_KEY),
-      label: "server"
-    },
-    {
-      url: sanitizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_URL),
-      key: sanitizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-      label: "next_public"
-    }
-  ];
+function validateSupabaseUrl(url: string, source: string) {
+  if (!url) {
+    return;
+  }
 
-  const validCandidate = candidates.find((candidate) => {
-    return Boolean(candidate.url) && Boolean(candidate.key) && /^https?:\/\//.test(candidate.url);
-  });
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    throw new Error(`Invalid Supabase URL from ${source}: must start with http or https. Received: ${url}`);
+  }
+}
+
+function resolveServerSupabaseEnv() {
+  const url = sanitizeEnvValue(process.env.SUPABASE_URL);
+  const key = sanitizeEnvValue(process.env.SUPABASE_ANON_KEY);
+
+  validateSupabaseUrl(url, "SUPABASE_URL");
 
   return {
-    candidates,
-    selected: validCandidate
+    url,
+    key
+  };
+}
+
+function resolveBrowserSupabaseEnv() {
+  const url = sanitizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const key = sanitizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+  validateSupabaseUrl(url, "NEXT_PUBLIC_SUPABASE_URL");
+
+  return {
+    url,
+    key
   };
 }
 
 export function getSupabaseClient() {
-  if (supabaseClient !== undefined) {
-    return supabaseClient;
+  if (serverSupabaseClient !== undefined) {
+    return serverSupabaseClient;
   }
 
-  const resolved = resolveSupabaseEnv();
+  const { url, key } = resolveServerSupabaseEnv();
 
-  console.info("[supabase] env check", {
-    candidates: resolved.candidates.map((candidate) => ({
-      label: candidate.label,
-      hasUrl: Boolean(candidate.url),
-      hasAnonKey: Boolean(candidate.key),
-      urlLooksValid: /^https?:\/\//.test(candidate.url)
-    })),
-    selected: resolved.selected?.label ?? null
+  console.info("[supabase] server env check", {
+    hasUrl: Boolean(url),
+    hasAnonKey: Boolean(key)
   });
 
-  if (!resolved.selected) {
-    supabaseClient = null;
-    const invalidUrlCandidate = resolved.candidates.find((candidate) => candidate.url && !/^https?:\/\//.test(candidate.url));
-
-    if (invalidUrlCandidate) {
-      throw new Error(`Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL. Received: ${invalidUrlCandidate.url}`);
-    }
-
-    return supabaseClient;
+  if (!url || !key) {
+    serverSupabaseClient = null;
+    return serverSupabaseClient;
   }
 
-  supabaseClient = createClient(resolved.selected.url, resolved.selected.key, {
+  serverSupabaseClient = createClient(url, key, {
     auth: {
       persistSession: false,
       autoRefreshToken: false
     }
   });
 
-  return supabaseClient;
+  return serverSupabaseClient;
+}
+
+export function getBrowserSupabaseClient() {
+  if (browserSupabaseClient !== undefined) {
+    return browserSupabaseClient;
+  }
+
+  const { url, key } = resolveBrowserSupabaseEnv();
+
+  console.info("[supabase] browser env check", {
+    hasUrl: Boolean(url),
+    hasAnonKey: Boolean(key)
+  });
+
+  if (!url || !key) {
+    browserSupabaseClient = null;
+    return browserSupabaseClient;
+  }
+
+  browserSupabaseClient = createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  });
+
+  return browserSupabaseClient;
 }
