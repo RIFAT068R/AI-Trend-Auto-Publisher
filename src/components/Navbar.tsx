@@ -3,10 +3,10 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
+import { Container } from "@/components/Container";
 
 const links = [
-  { href: "/", label: "Home" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/", label: "Dashboard" },
   { href: "/history", label: "History" }
 ] as const satisfies ReadonlyArray<{ href: Route; label: string }>;
 
@@ -15,19 +15,17 @@ export function Navbar() {
 
   return (
     <header className="site-header">
-      <div className="container">
-        <nav className="nav-shell">
-          <Link href="/" className="brand" aria-label="AI Trend Auto Publisher home">
-            <div className="brand-row">
-              <span className="brand-mark">AI</span>
-              <div className="brand">
-                <strong className="brand-title">AI Trend Auto Publisher</strong>
-                <span className="brand-subtitle">Automation workspace for trend discovery and content ops</span>
-              </div>
-            </div>
+      <Container>
+        <nav className="navbar glass-panel">
+          <Link href="/" className="brand-link" aria-label="AI Trend Auto Publisher dashboard">
+            <span className="brand-mark">AI</span>
+            <span className="brand-copy">
+              <strong>AI Trend Auto Publisher</strong>
+              <span>Automated AI Content Engine</span>
+            </span>
           </Link>
 
-          <div className="nav-links">
+          <div className="nav-links" aria-label="Primary navigation">
             {links.map((link) => {
               const active = pathname === link.href;
 
@@ -39,7 +37,7 @@ export function Navbar() {
             })}
           </div>
         </nav>
-      </div>
+      </Container>
     </header>
   );
 }

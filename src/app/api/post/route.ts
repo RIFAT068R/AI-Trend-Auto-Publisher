@@ -1,10 +1,29 @@
 import { NextResponse } from "next/server";
-import { getPostPlaceholder } from "@/lib/post";
+import { createPostJob } from "@/lib/post";
+import type { ApiResponse, PublishResult } from "@/lib/types";
 
 export async function GET() {
-  const post = await getPostPlaceholder();
-  return NextResponse.json({
-    route: "/api/post",
-    ...post
-  });
+  try {
+    const result = await createPostJob();
+
+    return NextResponse.json<ApiResponse<PublishResult>>(
+      {
+        ok: true,
+        data: result
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Failed to create post job", error);
+
+    return NextResponse.json<ApiResponse<PublishResult>>(
+      {
+        ok: false,
+        error: {
+          message: "Failed to create post job"
+        }
+      },
+      { status: 500 }
+    );
+  }
 }

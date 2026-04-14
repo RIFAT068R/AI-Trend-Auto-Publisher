@@ -1,11 +1,9 @@
-export type PostPlaceholder = {
-  provider: string;
-  message: string;
-};
+import type { PublishResult } from "@/lib/types";
 
-export async function getPostPlaceholder(): Promise<PostPlaceholder> {
+export async function createPostJob(): Promise<PublishResult> {
   return {
-    provider: "placeholder",
-    message: "Posting module is ready for your publishing destination."
+    destination: "Publishing queue",
+    status: "queued",
+    message: "Post delivery is staged behind a placeholder publisher and ready for platform adapters."
   };
 }

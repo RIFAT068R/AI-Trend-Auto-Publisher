@@ -1,10 +1,29 @@
 import { NextResponse } from "next/server";
-import { getImagePlaceholder } from "@/lib/image";
+import { generateImagePreview } from "@/lib/image";
+import type { ApiResponse, GeneratedImagePreview } from "@/lib/types";
 
 export async function GET() {
-  const image = await getImagePlaceholder();
-  return NextResponse.json({
-    route: "/api/image",
-    ...image
-  });
+  try {
+    const image = await generateImagePreview();
+
+    return NextResponse.json<ApiResponse<GeneratedImagePreview>>(
+      {
+        ok: true,
+        data: image
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Failed to generate image preview", error);
+
+    return NextResponse.json<ApiResponse<GeneratedImagePreview>>(
+      {
+        ok: false,
+        error: {
+          message: "Failed to generate image preview"
+        }
+      },
+      { status: 500 }
+    );
+  }
 }

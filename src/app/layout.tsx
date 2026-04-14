@@ -1,22 +1,21 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Manrope } from "next/font/google";
+import { JetBrains_Mono, Outfit } from "next/font/google";
 import { Navbar } from "@/components/Navbar";
 import "./globals.css";
 
-const manrope = Manrope({
+const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-sans"
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono",
-  weight: ["400", "500", "600"]
+  variable: "--font-mono"
 });
 
 export const metadata: Metadata = {
   title: "AI Trend Auto Publisher",
-  description: "Automation-ready trend discovery and publishing dashboard."
+  description: "Automated AI Content Engine"
 };
 
 type RootLayoutProps = Readonly<{
@@ -26,11 +25,13 @@ type RootLayoutProps = Readonly<{
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} ${ibmPlexMono.variable}`} style={{ fontFamily: "var(--font-sans)" }}>
+      <body className={`${outfit.variable} ${jetbrainsMono.variable}`}>
+        <div className="site-bg" aria-hidden="true">
+          <div className="bg-orb bg-orb-one" />
+          <div className="bg-orb bg-orb-two" />
+          <div className="bg-grid" />
+        </div>
         <div className="app-shell">
-          <div className="ambient-orb orb-one" />
-          <div className="ambient-orb orb-two" />
-          <div className="ambient-orb orb-three" />
           <Navbar />
           {children}
         </div>

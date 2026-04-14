@@ -1,11 +1,13 @@
-export type MetadataPlaceholder = {
-  provider: string;
-  message: string;
-};
+import type { GeneratedPostPreview } from "@/lib/types";
 
-export async function getMetadataPlaceholder(): Promise<MetadataPlaceholder> {
+export async function generatePostPreview(topic?: string): Promise<GeneratedPostPreview> {
+  const resolvedTopic = topic ?? "AI agent orchestration for content publishing";
+
   return {
-    provider: "placeholder",
-    message: "AI metadata generation module is ready for future integration."
+    title: `${resolvedTopic}: what teams should automate next`,
+    summary:
+      "A polished long-form post draft with a crisp thesis, publish-ready framing, and a modular structure designed for SEO and social repurposing.",
+    keywords: ["ai automation", "trend publishing", "content pipeline", "agent workflow"],
+    callToAction: "Review the brief, generate visuals, and queue the post for distribution."
   };
 }

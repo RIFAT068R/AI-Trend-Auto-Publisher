@@ -1,11 +1,12 @@
-export type ImagePlaceholder = {
-  provider: string;
-  message: string;
-};
+import type { GeneratedImagePreview } from "@/lib/types";
 
-export async function getImagePlaceholder(): Promise<ImagePlaceholder> {
+export async function generateImagePreview(topic?: string): Promise<GeneratedImagePreview> {
+  const resolvedTopic = topic ?? "AI automation dashboard";
+
   return {
-    provider: "placeholder",
-    message: "Image generation module is ready for a real API connection."
+    prompt:
+      `Premium editorial hero for ${resolvedTopic}, cinematic blue and cyan glow, glass interfaces, futuristic product lighting, refined minimal composition`,
+    imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80",
+    alt: "Abstract premium automation dashboard visual"
   };
 }

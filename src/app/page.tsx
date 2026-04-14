@@ -1,171 +1,128 @@
-import Link from "next/link";
+import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
-import { getAutomationModules } from "@/lib/storage";
+import { Container } from "@/components/Container";
+import { generateImagePreview } from "@/lib/image";
+import { generatePostPreview } from "@/lib/ai";
+import { getAutomationModules, getSystemStatus } from "@/lib/storage";
+import { getAllTrends, getTopTrend } from "@/lib/trends";
 
-const pipelineSteps = [
-  {
-    title: "Collect",
-    description: "Aggregate fresh signals from trend feeds and API providers into one normalized queue."
-  },
-  {
-    title: "Generate",
-    description: "Prepare SEO metadata, captions, prompts, and publishing assets from a single topic input."
-  },
-  {
-    title: "Publish",
-    description: "Fan out approved content into your channel stack with scheduling hooks and status tracking."
-  }
-] as const;
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(new Date(value));
+}
 
 export default async function HomePage() {
-  const modules = await getAutomationModules();
+  const [trends, topTrend, preview, image, systemStatus, modules] = await Promise.all([
+    getAllTrends(),
+    getTopTrend(),
+    generatePostPreview(),
+    generateImagePreview(),
+    getSystemStatus(),
+    getAutomationModules()
+  ]);
 
   return (
-    <main className="page">
-      <div className="container stack">
-        <section className="hero-panel reveal-up">
-          <div className="hero-copy">
-            <span className="eyebrow">Automation-ready publishing OS</span>
-            <h1>AI Trend Auto Publisher</h1>
-            <p className="hero-text">
-              A clean full-stack workspace for discovering trends, generating metadata, producing visuals,
-              and turning approved ideas into publishable content through modular API routes.
-            </p>
-            <div className="hero-actions">
-              <Link className="button-primary" href="/dashboard">
-                Open Dashboard
-              </Link>
-              <Link className="button-secondary" href="/history">
-                View Publishing History
-              </Link>
+    <main className="page-shell">
+      <Container>
+        <section className="hero reveal-up">
+          <div className="hero-badge">Premium automation dashboard</div>
+          <h1>AI Trend Auto Publisher</h1>
+          <p className="hero-subtitle">Automated AI Content Engine</p>
+          <p className="hero-description">
+            A premium control surface for trend discovery, content generation, creative previews, and publishing workflows.
+          </p>
+          <div className="hero-actions">
+            <Button href="/api/test">Check API</Button>
+            <Button href="/history" variant="secondary">
+              View History
+            </Button>
+          </div>
+          <div className="hero-stats">
+            <div className="hero-stat glass-panel">
+              <span>Active modules</span>
+              <strong>{modules.length}</strong>
             </div>
-            <div className="quick-stat-grid">
-              <div className="quick-stat">
-                <span className="metric-label">Workflow</span>
-                <strong className="stat-value">4 modular APIs</strong>
-                <span className="metric-note">Trends, generate, image, and post handlers ready for provider integration.</span>
-              </div>
-              <div className="quick-stat">
-                <span className="metric-label">Storage</span>
-                <strong className="stat-value">JSON-backed seed</strong>
-                <span className="metric-note">Local history can be replaced with a database without touching page contracts.</span>
-              </div>
-              <div className="quick-stat">
-                <span className="metric-label">Automation</span>
-                <strong className="stat-value">Scheduler-ready</strong>
-                <span className="metric-note">Prepared for GitHub Actions and future unattended publishing workflows.</span>
-              </div>
+            <div className="hero-stat glass-panel">
+              <span>Top trend score</span>
+              <strong>{topTrend.score}</strong>
+            </div>
+            <div className="hero-stat glass-panel">
+              <span>System state</span>
+              <strong>{systemStatus.overall}</strong>
             </div>
           </div>
+        </section>
 
-          <aside className="hero-visual reveal-up delay-1">
-            <div className="visual-window">
-              <div className="window-bar" aria-hidden="true">
-                <span className="window-dot" />
-                <span className="window-dot" />
-                <span className="window-dot" />
-              </div>
-
-              <div className="spotlight-card featured">
-                <span className="badge">Live System Snapshot</span>
-                <div className="metric-grid" style={{ marginTop: "16px" }}>
-                  {modules.map((module) => (
-                    <div key={module.name} className="metric-item">
-                      <span className="metric-label">{module.name}</span>
-                      <strong className="metric-value">{module.status}</strong>
-                      <span className="metric-note">Structured for provider swaps and background automation.</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="spotlight-card">
-                <div className="detail-row">
-                  <div className="section-stack">
-                    <span className="metric-label">Pipeline Health</span>
-                    <strong className="metric-value">Stable starter architecture</strong>
+        <section className="dashboard-grid reveal-up delay-1">
+          <Card title="Latest Trends" description="Fresh topics ranked for the next publishing window." eyebrow="Trending Topics">
+            <div className="trend-list">
+              {trends.slice(0, 4).map((trend) => (
+                <article key={trend.id} className="trend-item">
+                  <div>
+                    <h3>{trend.title}</h3>
+                    <p>
+                      {trend.category} · {trend.source}
+                    </p>
                   </div>
-                  <span className="status-pill">Ready</span>
+                  <div className="trend-meta">
+                    <span className="score-pill">{trend.score}</span>
+                    <time dateTime={trend.publishedAt}>{formatDate(trend.publishedAt)}</time>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </Card>
+
+          <Card title="Generated Post Preview" description="A ready-to-review content brief generated by the AI layer." eyebrow="Next Post Preview">
+            <div className="preview-block">
+              <span className="status-chip status-ready">Draft ready</span>
+              <h3>{preview.title}</h3>
+              <p>{preview.summary}</p>
+              <div className="keyword-row">
+                {preview.keywords.map((keyword) => (
+                  <span key={keyword} className="keyword-pill">
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+              <div className="preview-image glass-subpanel">
+                <div>
+                  <span className="micro-label">Image prompt</span>
+                  <p>{image.prompt}</p>
                 </div>
-                <div className="mini-chart" aria-hidden="true">
-                  <span style={{ height: "38%" }} />
-                  <span style={{ height: "66%" }} />
-                  <span style={{ height: "54%" }} />
-                  <span style={{ height: "82%" }} />
-                  <span style={{ height: "72%" }} />
-                  <span style={{ height: "96%" }} />
-                </div>
+                <span className="image-tag">Visual queued</span>
               </div>
             </div>
-          </aside>
-        </section>
+          </Card>
 
-        <section className="showcase-panel reveal-up delay-1">
-          <div className="section-intro">
-            <div className="section-copy">
-              <span className="eyebrow">Core workflow</span>
-              <h2 className="section-heading">Built for API-first automation</h2>
-              <p>
-                The project structure is already split into reusable libraries and App Router endpoints, so
-                each stage of the publishing pipeline can evolve independently.
-              </p>
+          <Card title="System Status" description="Operational readiness across the modular publishing stack." eyebrow="System Status">
+            <div className="system-stack">
+              <div className="system-summary glass-subpanel">
+                <div>
+                  <span className="micro-label">Overall state</span>
+                  <strong>{systemStatus.overall}</strong>
+                </div>
+                <time dateTime={systemStatus.updatedAt}>{formatDate(systemStatus.updatedAt)}</time>
+              </div>
+              <div className="module-list">
+                {systemStatus.modules.map((module) => (
+                  <div key={module.name} className="module-item">
+                    <div>
+                      <h3>{module.name}</h3>
+                      <p>{module.detail}</p>
+                    </div>
+                    <span className={`status-chip status-${module.status}`}>{module.status}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <Link className="button-secondary" href="/api/test">
-              Test API Route
-            </Link>
-          </div>
-
-          <div className="grid cols-3">
-            {pipelineSteps.map((step) => (
-              <div key={step.title} className="timeline-item reveal-up delay-2">
-                <span className="badge">{step.title}</span>
-                <strong className="timeline-title">{step.title} stage</strong>
-                <p className="timeline-copy">{step.description}</p>
-              </div>
-            ))}
-          </div>
+          </Card>
         </section>
-
-        <section className="section-stack">
-          <div className="section-intro reveal-up delay-2">
-            <div className="section-copy">
-              <span className="eyebrow">API endpoints</span>
-              <h2 className="section-heading">Modular services with clean contracts</h2>
-              <p>Each route is isolated, easy to test, and ready to connect to your preferred automation vendors.</p>
-            </div>
-          </div>
-
-          <div className="grid cols-3">
-            <Card title="/api/trends" description="Trend discovery endpoint for feed aggregation and source normalization." eyebrow="Collect">
-              <div className="detail-list">
-                <div className="detail-row">
-                  <span className="detail-label">Purpose</span>
-                  <strong>Fetch trending topics</strong>
-                </div>
-                <p className="detail-text">Prepared for live news, RSS, social, and platform-specific discovery providers.</p>
-              </div>
-            </Card>
-            <Card title="/api/generate" description="Metadata generation endpoint for titles, summaries, keywords, and prompts." eyebrow="Generate">
-              <div className="detail-list">
-                <div className="detail-row">
-                  <span className="detail-label">Purpose</span>
-                  <strong>AI metadata layer</strong>
-                </div>
-                <p className="detail-text">Designed for content briefs, SEO variants, caption packs, and prompt orchestration.</p>
-              </div>
-            </Card>
-            <Card title="/api/image" description="Visual generation endpoint for future image models and creative workflows." eyebrow="Visuals">
-              <div className="detail-list">
-                <div className="detail-row">
-                  <span className="detail-label">Purpose</span>
-                  <strong>Generate assets</strong>
-                </div>
-                <p className="detail-text">Ready for thumbnails, social cards, hero images, and multi-size exports.</p>
-              </div>
-            </Card>
-          </div>
-        </section>
-      </div>
+      </Container>
     </main>
   );
 }

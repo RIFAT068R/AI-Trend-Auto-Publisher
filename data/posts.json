@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "post-001",
+    "topic": "AI Automation",
+    "title": "Why autonomous content pipelines are becoming a growth advantage",
+    "status": "published",
+    "publishedAt": "2026-04-12T10:30:00.000Z",
+    "channel": "Website"
+  },
+  {
+    "id": "post-002",
+    "topic": "Content Strategy",
+    "title": "The modern editorial stack for multi-channel AI publishing",
+    "status": "scheduled",
+    "publishedAt": "2026-04-10T16:45:00.000Z",
+    "channel": "LinkedIn"
+  },
+  {
+    "id": "post-003",
+    "topic": "SEO",
+    "title": "AI-native search trends every marketing team should monitor",
+    "status": "draft",
+    "publishedAt": "2026-04-08T08:15:00.000Z",
+    "channel": "Newsletter"
+  }
+]
