@@ -1,143 +1,105 @@
-import { promises as fs } from "fs";
-import path from "path";
-import type { AutomationModule, CreateDraftInput, HistoryPost, SystemStatus } from "@/lib/types";
+import type { PostgrestError } from "@supabase/supabase-js";
+import { getSupabaseClient } from "@/lib/supabase";
+import type { AutomationModule, CreateDraftInput, HistoryPost, HistoryPostStatus, SupabasePostRow, SystemStatus } from "@/lib/types";
 
-const postsFilePath = path.join(process.cwd(), "data", "posts.json");
-
-let memoryPosts: HistoryPost[] = [];
-let fileReadAttempted = false;
-
-type LegacyHistoryPost = {
-  id?: string;
-  topic?: string;
-  title?: string;
-  status?: string;
-  publishedAt?: string;
-  channel?: string;
+type InsertPostRow = {
+  title: string;
+  hook: string;
+  caption: string;
+  hashtags: string[];
+  category: string;
+  imageurl: string;
+  source: string;
+  status: HistoryPostStatus;
 };
 
-function isHistoryPost(value: unknown): value is HistoryPost {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const post = value as Record<string, unknown>;
-
-  return (
-    typeof post.id === "string" &&
-    typeof post.topic === "string" &&
-    typeof post.title === "string" &&
-    typeof post.summary === "string" &&
-    typeof post.hook === "string" &&
-    typeof post.caption === "string" &&
-    Array.isArray(post.hashtags) &&
-    typeof post.category === "string" &&
-    typeof post.imagePrompt === "string" &&
-    typeof post.imageUrl === "string" &&
-    typeof post.status === "string" &&
-    typeof post.publishedAt === "string" &&
-    typeof post.channel === "string" &&
-    typeof post.source === "string"
-  );
-}
-
-function normalizeLegacyPost(value: unknown): HistoryPost | null {
-  if (!value || typeof value !== "object") {
-    return null;
-  }
-
-  const post = value as LegacyHistoryPost;
-
-  if (
-    typeof post.id !== "string" ||
-    typeof post.topic !== "string" ||
-    typeof post.title !== "string" ||
-    typeof post.status !== "string" ||
-    typeof post.publishedAt !== "string" ||
-    typeof post.channel !== "string"
-  ) {
-    return null;
-  }
-
+function mapSupabaseRowToHistoryPost(row: SupabasePostRow): HistoryPost {
   return {
-    id: post.id,
-    topic: post.topic,
-    title: post.title,
-    summary: "Imported legacy draft record.",
-    hook: `Imported post for ${post.title}.`,
-    caption: `Legacy post entry for ${post.topic}.`,
-    hashtags: ["#AI", "#Tech", "#Automation"],
-    category: "AI Tools",
+    id: row.id,
+    topic: row.category || row.title,
+    title: row.title,
+    summary: row.caption,
+    hook: row.hook,
+    caption: row.caption,
+    hashtags: Array.isArray(row.hashtags) ? row.hashtags : [],
+    category: row.category,
     imagePrompt: "futuristic AI technology background",
-    imageUrl: "https://via.placeholder.com/1080",
-    status: post.status === "published" || post.status === "scheduled" || post.status === "draft" ? post.status : "draft",
-    publishedAt: post.publishedAt,
-    channel: post.channel,
-    source: post.channel
+    imageUrl: row.imageurl ?? "https://via.placeholder.com/1080",
+    status: normalizeStatus(row.status),
+    publishedAt: row.createdat,
+    channel: row.source || "Dashboard",
+    source: row.source || "Dashboard",
+    createdAt: row.createdat
   };
 }
 
-async function loadFilePostsOnce() {
-  if (fileReadAttempted) {
-    return;
+function normalizeStatus(value: string): HistoryPostStatus {
+  if (value === "published" || value === "scheduled") {
+    return value;
   }
 
-  fileReadAttempted = true;
+  return "draft";
+}
 
-  try {
-    const file = await fs.readFile(postsFilePath, "utf8");
-    const parsed = JSON.parse(file) as unknown;
+function assertSupabaseConfigured() {
+  const client = getSupabaseClient();
 
-    if (!Array.isArray(parsed)) {
-      return;
-    }
-
-    memoryPosts = parsed
-      .map((item) => {
-        if (isHistoryPost(item)) {
-          return item;
-        }
-
-        return normalizeLegacyPost(item);
-      })
-      .filter((item): item is HistoryPost => item !== null)
-      .sort((left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime());
-  } catch {
-    memoryPosts = [];
+  if (!client) {
+    throw new Error("Supabase is not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY.");
   }
+
+  return client;
+}
+
+function formatDbError(context: string, error: PostgrestError | Error | null) {
+  if (!error) {
+    return `${context}.`;
+  }
+
+  return `${context}: ${error.message}`;
 }
 
 export async function getStoredPosts(): Promise<HistoryPost[]> {
-  await loadFilePostsOnce();
-  return [...memoryPosts];
+  const client = assertSupabaseConfigured();
+  const { data, error } = await client.from("posts").select("*").order("createdat", { ascending: false });
+
+  if (error) {
+    throw new Error(formatDbError("Failed to fetch posts from Supabase", error));
+  }
+
+  return ((data ?? []) as SupabasePostRow[]).map(mapSupabaseRowToHistoryPost);
 }
 
 export async function saveDraftPost(input: CreateDraftInput): Promise<HistoryPost> {
-  await loadFilePostsOnce();
-
-  const newPost: HistoryPost = {
-    id: `post-${Date.now()}`,
-    topic: input.trend.title,
+  const client = assertSupabaseConfigured();
+  const payload: InsertPostRow = {
     title: input.preview.title,
-    summary: input.preview.summary,
     hook: input.preview.hook,
     caption: input.preview.caption,
     hashtags: input.preview.hashtags,
     category: input.preview.category,
-    imagePrompt: input.preview.imagePrompt,
-    imageUrl: input.image.imageUrl,
-    status: "draft",
-    publishedAt: new Date().toISOString(),
-    channel: input.channel ?? "Dashboard",
-    source: input.trend.source
+    imageurl: input.image.imageUrl,
+    source: input.trend.source,
+    status: "draft"
   };
 
-  memoryPosts = [newPost, ...memoryPosts].sort((left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime());
-  return newPost;
+  const { data, error } = await client.from("posts").insert(payload).select("*").single();
+
+  if (error) {
+    throw new Error(formatDbError("Failed to save post to Supabase", error));
+  }
+
+  return mapSupabaseRowToHistoryPost(data as SupabasePostRow);
 }
 
 export async function getAutomationModules(): Promise<AutomationModule[]> {
-  const posts = await getStoredPosts();
+  let queueCount = 0;
+
+  try {
+    queueCount = (await getStoredPosts()).length;
+  } catch {
+    queueCount = 0;
+  }
 
   return [
     {
@@ -157,8 +119,8 @@ export async function getAutomationModules(): Promise<AutomationModule[]> {
     },
     {
       name: "Publishing Queue",
-      status: posts.length > 0 ? "queued" : "ready",
-      detail: posts.length > 0 ? `${posts.length} in-memory post(s) available for this runtime.` : "No posts generated in this runtime yet."
+      status: queueCount > 0 ? "queued" : "ready",
+      detail: queueCount > 0 ? `${queueCount} post(s) stored in Supabase.` : "No posts stored yet."
     }
   ];
 }

@@ -13,7 +13,7 @@ function formatDate(value: string) {
 }
 
 export default async function HistoryPage() {
-  const posts = await getStoredPosts();
+  const posts = await getStoredPosts().catch(() => []);
 
   return (
     <main className="page-shell">

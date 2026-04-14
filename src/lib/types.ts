@@ -61,6 +61,20 @@ export type HistoryPost = {
   publishedAt: string;
   channel: string;
   source: string;
+  createdAt: string;
+};
+
+export type SupabasePostRow = {
+  id: string;
+  title: string;
+  hook: string;
+  caption: string;
+  hashtags: string[] | null;
+  category: string;
+  imageurl: string | null;
+  source: string;
+  status: string;
+  createdat: string;
 };
 
 export type CreateDraftInput = {

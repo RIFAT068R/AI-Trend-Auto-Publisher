@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [trends, systemStatus, posts] = await Promise.all([
-    getAllTrends(),
-    getSystemStatus(),
-    getStoredPosts()
+    getAllTrends().catch(() => []),
+    getSystemStatus().catch(() => ({ overall: "ready" as const, updatedAt: new Date().toISOString(), modules: [] })),
+    getStoredPosts().catch(() => [])
   ]);
 
   return (

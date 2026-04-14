@@ -39,7 +39,8 @@ export async function runPublishingPipeline(): Promise<PipelineResult> {
     status: "draft" as const,
     publishedAt: new Date().toISOString(),
     channel: "Dashboard",
-    source: trend.source
+    source: trend.source,
+    createdAt: new Date().toISOString()
   }));
 
   return {
