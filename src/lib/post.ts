@@ -1,9 +1,24 @@
-import type { PublishResult } from "@/lib/types";
+import { generatePostPreview } from "@/lib/ai";
+import { generateImagePreview } from "@/lib/image";
+import { saveDraftPost } from "@/lib/storage";
+import { getTopTrend } from "@/lib/trends";
+import type { PipelineResult } from "@/lib/types";
 
-export async function createPostJob(): Promise<PublishResult> {
+export async function runPublishingPipeline(): Promise<PipelineResult> {
+  const trend = await getTopTrend();
+  const preview = await generatePostPreview(trend.title);
+  const image = await generateImagePreview(preview.imagePrompt);
+  const post = await saveDraftPost({
+    trend,
+    preview,
+    image,
+    channel: "Dashboard"
+  });
+
   return {
-    destination: "Publishing queue",
-    status: "queued",
-    message: "Post delivery is staged behind a placeholder publisher and ready for platform adapters."
+    trend,
+    preview,
+    image,
+    post
   };
 }

@@ -1,12 +1,16 @@
 import type { GeneratedImagePreview } from "@/lib/types";
 
-export async function generateImagePreview(topic?: string): Promise<GeneratedImagePreview> {
-  const resolvedTopic = topic ?? "AI automation dashboard";
+function encodePlaceholder(prompt: string) {
+  return encodeURIComponent(prompt.slice(0, 80));
+}
+
+export async function generateImagePreview(imagePrompt?: string): Promise<GeneratedImagePreview> {
+  const prompt = imagePrompt?.trim() || "Minimal SaaS dashboard illustration";
 
   return {
-    prompt:
-      `Premium editorial hero for ${resolvedTopic}, cinematic blue and cyan glow, glass interfaces, futuristic product lighting, refined minimal composition`,
-    imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80",
-    alt: "Abstract premium automation dashboard visual"
+    prompt,
+    imageUrl: `https://placehold.co/1200x675/e2e8f0/0f172a?text=${encodePlaceholder(prompt)}`,
+    alt: prompt,
+    provider: "placeholder"
   };
 }

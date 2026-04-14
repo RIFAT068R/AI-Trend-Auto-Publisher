@@ -209,6 +209,26 @@ img {
   flex-wrap: wrap;
 }
 
+.feedback-banner {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.feedback-success {
+  color: var(--success-text);
+  background: var(--success-bg);
+  border: 1px solid #bbf7d0;
+}
+
+.feedback-error {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -240,6 +260,11 @@ img {
 
 .button-secondary:hover {
   background: var(--bg-muted);
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .stats-grid {

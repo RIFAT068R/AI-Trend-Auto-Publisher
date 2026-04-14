@@ -25,9 +25,15 @@ export type TrendTopic = {
 };
 
 export type GeneratedPostPreview = {
+  topic: string;
   title: string;
   summary: string;
-  keywords: string[];
+  hook: string;
+  caption: string;
+  hashtags: string[];
+  category: string;
+  imagePrompt: string;
+  tags: string[];
   callToAction: string;
 };
 
@@ -35,12 +41,7 @@ export type GeneratedImagePreview = {
   prompt: string;
   imageUrl: string;
   alt: string;
-};
-
-export type PublishResult = {
-  destination: string;
-  status: "draft" | "queued" | "published";
-  message: string;
+  provider: "placeholder" | "remote";
 };
 
 export type HistoryPostStatus = "draft" | "scheduled" | "published";
@@ -49,9 +50,31 @@ export type HistoryPost = {
   id: string;
   topic: string;
   title: string;
+  summary: string;
+  hook: string;
+  caption: string;
+  hashtags: string[];
+  category: string;
+  imagePrompt: string;
+  imageUrl: string;
   status: HistoryPostStatus;
   publishedAt: string;
   channel: string;
+  source: string;
+};
+
+export type CreateDraftInput = {
+  trend: TrendTopic;
+  preview: GeneratedPostPreview;
+  image: GeneratedImagePreview;
+  channel?: string;
+};
+
+export type PipelineResult = {
+  trend: TrendTopic;
+  preview: GeneratedPostPreview;
+  image: GeneratedImagePreview;
+  post: HistoryPost;
 };
 
 export type AutomationModuleStatus = "online" | "ready" | "queued";
