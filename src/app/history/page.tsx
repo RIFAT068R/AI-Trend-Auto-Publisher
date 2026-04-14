@@ -16,40 +16,65 @@ export default async function HistoryPage() {
   return (
     <main className="page-shell">
       <Container>
-        <section className="page-intro reveal-up">
-          <span className="hero-badge">Archive</span>
-          <h1>Publishing History</h1>
-          <p>
-            Previous posts are stored in a local JSON source, keeping the UI clean while the backend remains easy to swap for a database later.
-          </p>
+        <section className="page-header reveal-up page-header-compact">
+          <div className="page-header-copy">
+            <span className="section-kicker">Archive</span>
+            <h1>Publishing History</h1>
+            <p>Review previous outputs, scheduling state, and publishing sources from the current local history store.</p>
+          </div>
+          <div className="page-header-actions">
+            <div className="header-meta glass-subpanel">
+              <span className="micro-label">Stored records</span>
+              <strong>{String(posts.length).padStart(2, "0")}</strong>
+            </div>
+          </div>
         </section>
 
-        <section className="history-list reveal-up delay-1">
-          {posts.map((post) => (
-            <Card
-              key={post.id}
-              title={post.title}
-              description={`${post.channel} distribution`}
-              eyebrow={post.topic}
-              className="history-card"
-            >
-              <div className="history-meta-row">
-                <div className="history-meta-item">
-                  <span className="micro-label">Date</span>
-                  <strong>{formatDate(post.publishedAt)}</strong>
-                </div>
-                <div className="history-meta-item">
-                  <span className="micro-label">Status</span>
-                  <span className={`status-chip status-${post.status}`}>{post.status}</span>
-                </div>
-                <div className="history-meta-item">
-                  <span className="micro-label">Record ID</span>
-                  <strong>{post.id}</strong>
-                </div>
+        {posts.length === 0 ? (
+          <section className="reveal-up delay-1">
+            <Card title="No publishing history yet" description="Create or queue a post to populate this archive." eyebrow="Empty state">
+              <div className="empty-state glass-subpanel">
+                <strong>No posts recorded</strong>
+                <p>The history table will automatically fill as new content moves through the publishing workflow.</p>
               </div>
             </Card>
-          ))}
-        </section>
+          </section>
+        ) : (
+          <section className="history-table-shell reveal-up delay-1">
+            <Card
+              title="Previous Posts"
+              description="A clean operational view of recent publishing records."
+              eyebrow="History"
+              className="history-table-card"
+            >
+              <div className="history-table history-table-head">
+                <span>Title</span>
+                <span>Status</span>
+                <span>Date</span>
+                <span>Source</span>
+              </div>
+              <div className="history-table-body">
+                {posts.map((post) => (
+                  <article key={post.id} className="history-table-row">
+                    <div className="history-cell history-title-cell">
+                      <strong>{post.title}</strong>
+                      <span>{post.topic}</span>
+                    </div>
+                    <div className="history-cell" data-label="Status">
+                      <span className={`status-chip status-${post.status}`}>{post.status}</span>
+                    </div>
+                    <div className="history-cell" data-label="Date">
+                      <strong>{formatDate(post.publishedAt)}</strong>
+                    </div>
+                    <div className="history-cell" data-label="Source">
+                      <strong>{post.channel}</strong>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </Card>
+          </section>
+        )}
       </Container>
     </main>
   );

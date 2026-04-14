@@ -3,7 +3,7 @@ import { Card } from "@/components/Card";
 import { Container } from "@/components/Container";
 import { generateImagePreview } from "@/lib/image";
 import { generatePostPreview } from "@/lib/ai";
-import { getAutomationModules, getSystemStatus } from "@/lib/storage";
+import { getStoredPosts, getSystemStatus } from "@/lib/storage";
 import { getAllTrends, getTopTrend } from "@/lib/trends";
 
 function formatDate(value: string) {
@@ -16,72 +16,115 @@ function formatDate(value: string) {
 }
 
 export default async function HomePage() {
-  const [trends, topTrend, preview, image, systemStatus, modules] = await Promise.all([
+  const [trends, topTrend, preview, image, systemStatus, posts] = await Promise.all([
     getAllTrends(),
     getTopTrend(),
     generatePostPreview(),
     generateImagePreview(),
     getSystemStatus(),
-    getAutomationModules()
+    getStoredPosts()
   ]);
+
+  const stats = [
+    {
+      label: "Tracked trends",
+      value: String(trends.length).padStart(2, "0"),
+      detail: "Fresh ranked topics"
+    },
+    {
+      label: "Queue items",
+      value: String(posts.length).padStart(2, "0"),
+      detail: "Saved publishing records"
+    },
+    {
+      label: "Top trend score",
+      value: String(topTrend.score),
+      detail: topTrend.category
+    },
+    {
+      label: "System health",
+      value: systemStatus.overall,
+      detail: "Operational modules online"
+    }
+  ] as const;
+
+  const recentActivity = posts.slice(0, 4);
 
   return (
     <main className="page-shell">
       <Container>
-        <section className="hero reveal-up">
-          <div className="hero-badge">Premium automation dashboard</div>
-          <h1>AI Trend Auto Publisher</h1>
-          <p className="hero-subtitle">Automated AI Content Engine</p>
-          <p className="hero-description">
-            A premium control surface for trend discovery, content generation, creative previews, and publishing workflows.
-          </p>
-          <div className="hero-actions">
-            <Button href="/api/test">Check API</Button>
-            <Button href="/history" variant="secondary">
-              View History
-            </Button>
+        <section className="page-header reveal-up">
+          <div className="page-header-copy">
+            <span className="section-kicker">Operations Dashboard</span>
+            <h1>AI Trend Auto Publisher</h1>
+            <p>
+              Monitor trend discovery, review generated content, and keep publishing workflows moving from one clean control surface.
+            </p>
           </div>
-          <div className="hero-stats">
-            <div className="hero-stat glass-panel">
-              <span>Active modules</span>
-              <strong>{modules.length}</strong>
+          <div className="page-header-actions">
+            <div className="header-meta glass-subpanel">
+              <span className="micro-label">Last update</span>
+              <strong>{formatDate(systemStatus.updatedAt)}</strong>
             </div>
-            <div className="hero-stat glass-panel">
-              <span>Top trend score</span>
-              <strong>{topTrend.score}</strong>
-            </div>
-            <div className="hero-stat glass-panel">
-              <span>System state</span>
-              <strong>{systemStatus.overall}</strong>
-            </div>
+            <Button href="/api/test">Run API check</Button>
+            <Button href="/history" variant="secondary">
+              Open history
+            </Button>
           </div>
         </section>
 
-        <section className="dashboard-grid reveal-up delay-1">
-          <Card title="Latest Trends" description="Fresh topics ranked for the next publishing window." eyebrow="Trending Topics">
+        <section className="stats-grid reveal-up delay-1">
+          {stats.map((stat) => (
+            <article key={stat.label} className="stat-card glass-panel">
+              <span className="micro-label">{stat.label}</span>
+              <strong>{stat.value}</strong>
+              <p>{stat.detail}</p>
+            </article>
+          ))}
+        </section>
+
+        <section className="dashboard-layout reveal-up delay-1">
+          <Card
+            title="Trending Topics"
+            description="Topics with the strongest publishing potential right now."
+            eyebrow="Discovery"
+            className="panel-primary"
+            headerSlot={<span className="header-pill">Live feed</span>}
+          >
             <div className="trend-list">
               {trends.slice(0, 4).map((trend) => (
                 <article key={trend.id} className="trend-item">
-                  <div>
+                  <div className="trend-main">
                     <h3>{trend.title}</h3>
-                    <p>
-                      {trend.category} · {trend.source}
-                    </p>
+                    <p>{trend.category}</p>
+                    <div className="inline-meta">
+                      <span>{trend.source}</span>
+                      <span>{formatDate(trend.publishedAt)}</span>
+                    </div>
                   </div>
                   <div className="trend-meta">
                     <span className="score-pill">{trend.score}</span>
-                    <time dateTime={trend.publishedAt}>{formatDate(trend.publishedAt)}</time>
+                    <span className="micro-label">score</span>
                   </div>
                 </article>
               ))}
             </div>
           </Card>
 
-          <Card title="Generated Post Preview" description="A ready-to-review content brief generated by the AI layer." eyebrow="Next Post Preview">
+          <Card
+            title="Generated Post Preview"
+            description="Draft output prepared for review, visuals, and scheduling."
+            eyebrow="AI Draft"
+            className="panel-secondary"
+            headerSlot={<span className="status-chip status-ready">Ready</span>}
+          >
             <div className="preview-block">
-              <span className="status-chip status-ready">Draft ready</span>
               <h3>{preview.title}</h3>
               <p>{preview.summary}</p>
+              <div className="preview-cta glass-subpanel">
+                <span className="micro-label">Next action</span>
+                <strong>{preview.callToAction}</strong>
+              </div>
               <div className="keyword-row">
                 {preview.keywords.map((keyword) => (
                   <span key={keyword} className="keyword-pill">
@@ -99,7 +142,12 @@ export default async function HomePage() {
             </div>
           </Card>
 
-          <Card title="System Status" description="Operational readiness across the modular publishing stack." eyebrow="System Status">
+          <Card
+            title="System Status"
+            description="Readiness across discovery, generation, visuals, and publishing."
+            eyebrow="Infrastructure"
+            className="panel-wide"
+          >
             <div className="system-stack">
               <div className="system-summary glass-subpanel">
                 <div>
@@ -108,9 +156,9 @@ export default async function HomePage() {
                 </div>
                 <time dateTime={systemStatus.updatedAt}>{formatDate(systemStatus.updatedAt)}</time>
               </div>
-              <div className="module-list">
+              <div className="module-table">
                 {systemStatus.modules.map((module) => (
-                  <div key={module.name} className="module-item">
+                  <div key={module.name} className="module-row">
                     <div>
                       <h3>{module.name}</h3>
                       <p>{module.detail}</p>
@@ -119,6 +167,36 @@ export default async function HomePage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </Card>
+
+          <Card
+            title="Recent Activity"
+            description="Latest publishing records and queued items from local storage."
+            eyebrow="Publishing Queue"
+            className="panel-wide"
+            headerSlot={<span className="header-pill">{recentActivity.length} items</span>}
+          >
+            <div className="activity-list">
+              {recentActivity.map((post) => (
+                <article key={post.id} className="activity-row">
+                  <div>
+                    <h3>{post.title}</h3>
+                    <p>{post.topic}</p>
+                  </div>
+                  <div className="activity-meta">
+                    <span>{post.channel}</span>
+                    <span>{formatDate(post.publishedAt)}</span>
+                    <span className={`status-chip status-${post.status}`}>{post.status}</span>
+                  </div>
+                </article>
+              ))}
+              {recentActivity.length === 0 ? (
+                <div className="empty-state glass-subpanel">
+                  <strong>No activity yet</strong>
+                  <p>Publishing records will appear here as soon as new posts are generated or scheduled.</p>
+                </div>
+              ) : null}
             </div>
           </Card>
         </section>

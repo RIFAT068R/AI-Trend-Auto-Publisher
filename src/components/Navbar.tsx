@@ -13,6 +13,14 @@ const links = [
 export function Navbar() {
   const pathname = usePathname();
 
+  const isActiveRoute = (href: Route) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   return (
     <header className="site-header">
       <Container>
@@ -27,7 +35,7 @@ export function Navbar() {
 
           <div className="nav-links" aria-label="Primary navigation">
             {links.map((link) => {
-              const active = pathname === link.href;
+              const active = isActiveRoute(link.href);
 
               return (
                 <Link key={link.href} href={link.href} className={`nav-link${active ? " active" : ""}`}>
