@@ -4,6 +4,9 @@ import type { AutomationModule, CreateDraftInput, HistoryPost, SystemStatus } fr
 
 const postsFilePath = path.join(process.cwd(), "data", "posts.json");
 
+let memoryPosts: HistoryPost[] = [];
+let fileReadAttempted = false;
+
 type LegacyHistoryPost = {
   id?: string;
   topic?: string;
@@ -63,10 +66,10 @@ function normalizeLegacyPost(value: unknown): HistoryPost | null {
     summary: "Imported legacy draft record.",
     hook: `Imported post for ${post.title}.`,
     caption: `Legacy post entry for ${post.topic}.`,
-    hashtags: ["#ImportedPost"],
-    category: post.topic,
-    imagePrompt: `Create a clean editorial image for ${post.title}`,
-    imageUrl: "https://placehold.co/1200x675/e2e8f0/0f172a?text=Imported+Post",
+    hashtags: ["#AI", "#Tech", "#Automation"],
+    category: "AI Tools",
+    imagePrompt: "futuristic AI technology background",
+    imageUrl: "https://via.placeholder.com/1080",
     status: post.status === "published" || post.status === "scheduled" || post.status === "draft" ? post.status : "draft",
     publishedAt: post.publishedAt,
     channel: post.channel,
@@ -74,28 +77,22 @@ function normalizeLegacyPost(value: unknown): HistoryPost | null {
   };
 }
 
-async function ensurePostsFile() {
-  await fs.mkdir(path.dirname(postsFilePath), { recursive: true });
-
-  try {
-    await fs.access(postsFilePath);
-  } catch {
-    await fs.writeFile(postsFilePath, "[]", "utf8");
+async function loadFilePostsOnce() {
+  if (fileReadAttempted) {
+    return;
   }
-}
 
-export async function getStoredPosts(): Promise<HistoryPost[]> {
-  await ensurePostsFile();
+  fileReadAttempted = true;
 
   try {
     const file = await fs.readFile(postsFilePath, "utf8");
     const parsed = JSON.parse(file) as unknown;
 
     if (!Array.isArray(parsed)) {
-      return [];
+      return;
     }
 
-    return parsed
+    memoryPosts = parsed
       .map((item) => {
         if (isHistoryPost(item)) {
           return item;
@@ -104,17 +101,19 @@ export async function getStoredPosts(): Promise<HistoryPost[]> {
         return normalizeLegacyPost(item);
       })
       .filter((item): item is HistoryPost => item !== null)
-      .sort((left, right) => {
-        return new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime();
-      });
+      .sort((left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime());
   } catch {
-    return [];
+    memoryPosts = [];
   }
 }
 
+export async function getStoredPosts(): Promise<HistoryPost[]> {
+  await loadFilePostsOnce();
+  return [...memoryPosts];
+}
+
 export async function saveDraftPost(input: CreateDraftInput): Promise<HistoryPost> {
-  const posts = await getStoredPosts();
-  const now = new Date().toISOString();
+  await loadFilePostsOnce();
 
   const newPost: HistoryPost = {
     id: `post-${Date.now()}`,
@@ -128,14 +127,12 @@ export async function saveDraftPost(input: CreateDraftInput): Promise<HistoryPos
     imagePrompt: input.preview.imagePrompt,
     imageUrl: input.image.imageUrl,
     status: "draft",
-    publishedAt: now,
+    publishedAt: new Date().toISOString(),
     channel: input.channel ?? "Dashboard",
     source: input.trend.source
   };
 
-  const updatedPosts = [newPost, ...posts];
-  await fs.writeFile(postsFilePath, JSON.stringify(updatedPosts, null, 2), "utf8");
-
+  memoryPosts = [newPost, ...memoryPosts].sort((left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime());
   return newPost;
 }
 
@@ -146,22 +143,22 @@ export async function getAutomationModules(): Promise<AutomationModule[]> {
     {
       name: "Trend Discovery",
       status: "online",
-      detail: "Live feeds from Hacker News and tech RSS are available."
+      detail: "Hacker News fetch is active with a mock fallback when the network fails."
     },
     {
       name: "Post Generation",
       status: "ready",
-      detail: "Mock generation is active and can upgrade to a real AI provider when a key is configured."
+      detail: "Mock metadata generation is always available without API keys."
     },
     {
       name: "Image Engine",
       status: "ready",
-      detail: "Placeholder image generation is returning a usable preview URL."
+      detail: "Placeholder image responses are enabled with no external provider dependency."
     },
     {
       name: "Publishing Queue",
       status: posts.length > 0 ? "queued" : "ready",
-      detail: posts.length > 0 ? `${posts.length} stored post(s) available in local JSON storage.` : "No posts saved yet."
+      detail: posts.length > 0 ? `${posts.length} in-memory post(s) available for this runtime.` : "No posts generated in this runtime yet."
     }
   ];
 }
@@ -170,7 +167,7 @@ export async function getSystemStatus(): Promise<SystemStatus> {
   const modules = await getAutomationModules();
 
   return {
-    overall: modules.some((module) => module.status === "online") ? "online" : "ready",
+    overall: "online",
     updatedAt: new Date().toISOString(),
     modules
   };

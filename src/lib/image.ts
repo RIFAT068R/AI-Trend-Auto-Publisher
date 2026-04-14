@@ -1,16 +1,10 @@
 import type { GeneratedImagePreview } from "@/lib/types";
 
-function encodePlaceholder(prompt: string) {
-  return encodeURIComponent(prompt.slice(0, 80));
-}
-
 export async function generateImagePreview(imagePrompt?: string): Promise<GeneratedImagePreview> {
-  const prompt = imagePrompt?.trim() || "Minimal SaaS dashboard illustration";
-
   return {
-    prompt,
-    imageUrl: `https://placehold.co/1200x675/e2e8f0/0f172a?text=${encodePlaceholder(prompt)}`,
-    alt: prompt,
+    prompt: imagePrompt?.trim() || "futuristic AI technology background",
+    imageUrl: "https://via.placeholder.com/1080",
+    alt: "Mock generated image",
     provider: "placeholder"
   };
 }
