@@ -71,10 +71,10 @@ export type SupabasePostRow = {
   caption: string;
   hashtags: string[] | null;
   category: string;
-  imageurl: string | null;
+  image_url: string | null;
   source: string;
   status: string;
-  createdat: string;
+  created_at: string;
 };
 
 export type CreateDraftInput = {

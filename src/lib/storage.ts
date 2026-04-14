@@ -8,9 +8,10 @@ type InsertPostRow = {
   caption: string;
   hashtags: string[];
   category: string;
-  imageurl: string;
+  image_url: string;
   source: string;
   status: HistoryPostStatus;
+  created_at: string;
 };
 
 function mapSupabaseRowToHistoryPost(row: SupabasePostRow): HistoryPost {
@@ -24,12 +25,12 @@ function mapSupabaseRowToHistoryPost(row: SupabasePostRow): HistoryPost {
     hashtags: Array.isArray(row.hashtags) ? row.hashtags : [],
     category: row.category,
     imagePrompt: "futuristic AI technology background",
-    imageUrl: row.imageurl ?? "https://via.placeholder.com/1080",
+    imageUrl: row.image_url ?? "https://via.placeholder.com/1080",
     status: normalizeStatus(row.status),
-    publishedAt: row.createdat,
+    publishedAt: row.created_at,
     channel: row.source || "Dashboard",
     source: row.source || "Dashboard",
-    createdAt: row.createdat
+    createdAt: row.created_at
   };
 }
 
@@ -59,35 +60,78 @@ function formatDbError(context: string, error: PostgrestError | Error | null) {
   return `${context}: ${error.message}`;
 }
 
+function logSupabaseError(context: string, error: PostgrestError | Error | null) {
+  if (!error) {
+    console.error(`[supabase] ${context}`, { message: "Unknown error" });
+    return;
+  }
+
+  if ("code" in error) {
+    console.error(`[supabase] ${context}`, {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    });
+    return;
+  }
+
+  console.error(`[supabase] ${context}`, {
+    message: error.message
+  });
+}
+
 export async function getStoredPosts(): Promise<HistoryPost[]> {
   const client = assertSupabaseConfigured();
-  const { data, error } = await client.from("posts").select("*").order("createdat", { ascending: false });
+  console.info("[supabase] selecting posts", { table: "posts" });
+  const { data, error } = await client.from("posts").select("*").order("created_at", { ascending: false });
 
   if (error) {
+    logSupabaseError("select posts failed", error);
     throw new Error(formatDbError("Failed to fetch posts from Supabase", error));
   }
+
+  console.info("[supabase] select posts success", {
+    rowCount: data?.length ?? 0
+  });
 
   return ((data ?? []) as SupabasePostRow[]).map(mapSupabaseRowToHistoryPost);
 }
 
 export async function saveDraftPost(input: CreateDraftInput): Promise<HistoryPost> {
   const client = assertSupabaseConfigured();
+  const createdAt = new Date().toISOString();
   const payload: InsertPostRow = {
     title: input.preview.title,
     hook: input.preview.hook,
     caption: input.preview.caption,
     hashtags: input.preview.hashtags,
     category: input.preview.category,
-    imageurl: input.image.imageUrl,
+    image_url: input.image.imageUrl,
     source: input.trend.source,
-    status: "draft"
+    status: "draft",
+    created_at: createdAt
   };
+
+  console.info("[supabase] inserting post", {
+    table: "posts",
+    title: payload.title,
+    source: payload.source,
+    status: payload.status,
+    created_at: payload.created_at
+  });
 
   const { data, error } = await client.from("posts").insert(payload).select("*").single();
 
   if (error) {
+    logSupabaseError("insert post failed", error);
     throw new Error(formatDbError("Failed to save post to Supabase", error));
   }
+
+  console.info("[supabase] insert post success", {
+    id: data.id,
+    created_at: data.created_at
+  });
 
   return mapSupabaseRowToHistoryPost(data as SupabasePostRow);
 }

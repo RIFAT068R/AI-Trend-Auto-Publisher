@@ -25,23 +25,7 @@ export async function runPublishingPipeline(): Promise<PipelineResult> {
     preview,
     image,
     channel: "Dashboard"
-  }).catch(async () => ({
-    id: `post-${Date.now()}`,
-    topic: trend.title,
-    title: preview.title,
-    summary: preview.summary,
-    hook: preview.hook,
-    caption: preview.caption,
-    hashtags: preview.hashtags,
-    category: preview.category,
-    imagePrompt: preview.imagePrompt,
-    imageUrl: image.imageUrl,
-    status: "draft" as const,
-    publishedAt: new Date().toISOString(),
-    channel: "Dashboard",
-    source: trend.source,
-    createdAt: new Date().toISOString()
-  }));
+  });
 
   return {
     trend,

@@ -9,6 +9,13 @@ export function getSupabaseClient() {
 
   const url = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
+  const hasUrl = Boolean(url);
+  const hasAnonKey = Boolean(anonKey);
+
+  console.info("[supabase] env check", {
+    hasUrl,
+    hasAnonKey
+  });
 
   if (!url || !anonKey) {
     supabaseClient = null;

@@ -53,13 +53,16 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    console.info("[pipeline] request received");
     const body = (await request.json().catch(() => ({}))) as CreatePostBody & { mode?: "pipeline" | "draft" };
 
     if (body.mode === "draft" && body.topic) {
+      console.info("[pipeline] draft mode start", { topic: body.topic, source: body.source ?? "Manual Entry" });
       const trend = createTrendFromTopic(body);
       const preview = await generatePostPreview(trend.title);
       const image = await generateImagePreview(preview.imagePrompt);
       const post = await saveDraftPost({ trend, preview, image } satisfies CreateDraftInput);
+      console.info("[pipeline] draft mode saved", { id: post.id, createdAt: post.createdAt });
 
       return NextResponse.json<ApiResponse<HistoryPost>>(
         {
@@ -70,7 +73,13 @@ export async function POST(request: Request) {
       );
     }
 
+    console.info("[pipeline] pipeline mode start");
     const result = await runPublishingPipeline();
+    console.info("[pipeline] pipeline mode saved", {
+      id: result.post.id,
+      createdAt: result.post.createdAt,
+      title: result.post.title
+    });
 
     return NextResponse.json<ApiResponse<PipelineResult>>(
       {
