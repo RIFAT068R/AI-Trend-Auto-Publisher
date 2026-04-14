@@ -1,26 +1,23 @@
 [
   {
-    "id": "post-001",
-    "topic": "AI Automation",
-    "title": "Why autonomous content pipelines are becoming a growth advantage",
-    "status": "published",
-    "publishedAt": "2026-04-12T10:30:00.000Z",
-    "channel": "Website"
-  },
-  {
-    "id": "post-002",
-    "topic": "Content Strategy",
-    "title": "The modern editorial stack for multi-channel AI publishing",
-    "status": "scheduled",
-    "publishedAt": "2026-04-10T16:45:00.000Z",
-    "channel": "LinkedIn"
-  },
-  {
-    "id": "post-003",
-    "topic": "SEO",
-    "title": "AI-native search trends every marketing team should monitor",
+    "id": "post-1776174020789",
+    "topic": "What is jj and why should I care?",
+    "title": "What is jj and why should I care?: what operators should do next",
+    "summary": "A short-form draft focused on why what is jj and why should i care? matters now, what changed recently, and how teams can act on it without overcomplicating their workflow.",
+    "hook": "What is jj and why should I care? is moving from interesting signal to real workflow priority.",
+    "caption": "Teams are watching what is jj and why should i care? closely because it is shaping how content gets discovered, created, and shipped faster.",
+    "hashtags": [
+      "#AITools",
+      "#Automation",
+      "#whatis",
+      "#ContentOps"
+    ],
+    "category": "Technology",
+    "imagePrompt": "Create a clean editorial illustration about What is jj and why should I care?, modern SaaS dashboard style, minimal composition, soft blue accents, bright background.",
+    "imageUrl": "https://placehold.co/1200x675/e2e8f0/0f172a?text=Create%20a%20clean%20editorial%20illustration%20about%20What%20is%20jj%20and%20why%20should%20I%20care%3F%2C%20m",
     "status": "draft",
-    "publishedAt": "2026-04-08T08:15:00.000Z",
-    "channel": "Newsletter"
+    "publishedAt": "2026-04-14T13:40:20.789Z",
+    "channel": "Dashboard",
+    "source": "Hacker News"
   }
 ]

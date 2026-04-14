@@ -2,6 +2,8 @@ import { Card } from "@/components/Card";
 import { Container } from "@/components/Container";
 import { getStoredPosts } from "@/lib/storage";
 
+export const dynamic = "force-dynamic";
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en", {
     year: "numeric",
@@ -53,7 +55,7 @@ export default async function HistoryPage() {
                     <strong>{formatDate(post.publishedAt)}</strong>
                   </div>
                   <div className="history-cell" data-label="Source">
-                    <strong>{post.channel}</strong>
+                    <strong>{post.source}</strong>
                   </div>
                 </article>
               ))}

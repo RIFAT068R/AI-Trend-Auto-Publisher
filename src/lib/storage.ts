@@ -4,6 +4,15 @@ import type { AutomationModule, CreateDraftInput, HistoryPost, SystemStatus } fr
 
 const postsFilePath = path.join(process.cwd(), "data", "posts.json");
 
+type LegacyHistoryPost = {
+  id?: string;
+  topic?: string;
+  title?: string;
+  status?: string;
+  publishedAt?: string;
+  channel?: string;
+};
+
 function isHistoryPost(value: unknown): value is HistoryPost {
   if (!value || typeof value !== "object") {
     return false;
@@ -29,6 +38,42 @@ function isHistoryPost(value: unknown): value is HistoryPost {
   );
 }
 
+function normalizeLegacyPost(value: unknown): HistoryPost | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const post = value as LegacyHistoryPost;
+
+  if (
+    typeof post.id !== "string" ||
+    typeof post.topic !== "string" ||
+    typeof post.title !== "string" ||
+    typeof post.status !== "string" ||
+    typeof post.publishedAt !== "string" ||
+    typeof post.channel !== "string"
+  ) {
+    return null;
+  }
+
+  return {
+    id: post.id,
+    topic: post.topic,
+    title: post.title,
+    summary: "Imported legacy draft record.",
+    hook: `Imported post for ${post.title}.`,
+    caption: `Legacy post entry for ${post.topic}.`,
+    hashtags: ["#ImportedPost"],
+    category: post.topic,
+    imagePrompt: `Create a clean editorial image for ${post.title}`,
+    imageUrl: "https://placehold.co/1200x675/e2e8f0/0f172a?text=Imported+Post",
+    status: post.status === "published" || post.status === "scheduled" || post.status === "draft" ? post.status : "draft",
+    publishedAt: post.publishedAt,
+    channel: post.channel,
+    source: post.channel
+  };
+}
+
 async function ensurePostsFile() {
   await fs.mkdir(path.dirname(postsFilePath), { recursive: true });
 
@@ -50,9 +95,18 @@ export async function getStoredPosts(): Promise<HistoryPost[]> {
       return [];
     }
 
-    return parsed.filter(isHistoryPost).sort((left, right) => {
-      return new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime();
-    });
+    return parsed
+      .map((item) => {
+        if (isHistoryPost(item)) {
+          return item;
+        }
+
+        return normalizeLegacyPost(item);
+      })
+      .filter((item): item is HistoryPost => item !== null)
+      .sort((left, right) => {
+        return new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime();
+      });
   } catch {
     return [];
   }
