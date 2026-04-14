@@ -21,7 +21,7 @@ function buildMockMetadata(topic?: string): GeneratedMetadata {
     caption: `${resolvedTopic} is getting attention because teams want faster workflows, smarter automation, and simpler ways to ship content consistently.`,
     hashtags: ["#AI", "#Tech", "#Automation"],
     category: "AI Tools",
-    imagePrompt: "futuristic AI technology background"
+    imagePrompt: `futuristic AI technology background inspired by ${resolvedTopic}, clean composition, subject on right side, empty space on left for text, no text`
   };
 }
 
@@ -88,7 +88,7 @@ export async function generateMetadata(topic?: string): Promise<GeneratedMetadat
                 {
                   text:
                     `Generate social content metadata for the topic "${resolvedTopic}". Return valid JSON only with exactly these fields: hook, caption, hashtags, category, imagePrompt. ` +
-                    "The hook should be short and viral. The caption should be one concise paragraph. hashtags must be an array of strings. category should be concise. imagePrompt should describe a visual concept. Do not wrap in markdown."
+                    "The hook should be short and viral. The caption should be one concise paragraph. hashtags must be an array of strings. category should be concise. imagePrompt should describe a visual concept for a text-free poster background with clean composition, subject on the right side, empty space on the left for text, and no text. Do not wrap in markdown."
                 }
               ]
             }

@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
+import { Poster } from "@/components/Poster";
 import type { ApiResponse, GeneratedImagePreview, GeneratedMetadata, HistoryPost, PipelineResult, SystemStatus, TrendTopic } from "@/lib/types";
 
 type DashboardClientProps = {
@@ -268,8 +268,14 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
 
               {previewImage ? (
                 <div className="info-panel">
-                  <span className="info-label">Generated image</span>
-                  <Image src={previewImage.imageUrl} alt={previewImage.alt} className="preview-image-display" width={320} height={320} unoptimized />
+                  <span className="info-label">Poster preview</span>
+                  <Poster
+                    imageUrl={previewImage.imageUrl}
+                    hook={latestPreview.hook}
+                    category={latestPreview.category}
+                    alt={previewImage.alt}
+                    className="preview-poster"
+                  />
                 </div>
               ) : null}
             </div>

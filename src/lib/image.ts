@@ -2,7 +2,7 @@ import type { GeneratedImagePreview } from "@/lib/types";
 
 function enhanceImagePrompt(imagePrompt?: string) {
   const basePrompt = imagePrompt?.trim() || "futuristic AI technology background";
-  return `${basePrompt}, futuristic tech style, clean composition, minimal dark background, cinematic lighting, high contrast, premium poster aesthetic`;
+  return `${basePrompt}, futuristic tech style, clean composition, subject on right side, empty space on left for text, no text, minimal dark background, cinematic lighting, high contrast, premium poster aesthetic`;
 }
 
 function toDataUrl(base64: string) {

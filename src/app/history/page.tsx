@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { Card } from "@/components/Card";
 import { Container } from "@/components/Container";
+import { Poster } from "@/components/Poster";
 import { getStoredPosts } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +48,15 @@ export default async function HistoryPage() {
                   <div className="history-cell history-title-cell" data-label="Title">
                     <strong>{post.title}</strong>
                     <span>{post.topic}</span>
-                    {post.imageUrl ? <Image src={post.imageUrl} alt={post.title} className="history-image-thumb" width={140} height={140} unoptimized /> : null}
+                    {post.imageUrl ? (
+                      <Poster
+                        imageUrl={post.imageUrl}
+                        hook={post.hook}
+                        category={post.category}
+                        alt={post.title}
+                        className="history-poster"
+                      />
+                    ) : null}
                   </div>
                   <div className="history-cell" data-label="Status">
                     <span className={`status-badge status-${post.status}`}>{post.status}</span>
