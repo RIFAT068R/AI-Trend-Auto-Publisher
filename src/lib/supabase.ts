@@ -7,37 +7,72 @@ function sanitizeEnvValue(value?: string) {
   return value?.trim().replace(/^['"]|['"]$/g, "") ?? "";
 }
 
+function looksLikeUrl(value: string) {
+  return value.startsWith("http://") || value.startsWith("https://");
+}
+
+function looksLikePublishableKey(value: string) {
+  return value.startsWith("sb_");
+}
+
 function validateSupabaseUrl(url: string, source: string) {
   if (!url) {
     return;
   }
 
-  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+  if (!looksLikeUrl(url)) {
     throw new Error(`Invalid Supabase URL from ${source}: must start with http or https. Received: ${url}`);
   }
 }
 
-function resolveServerSupabaseEnv() {
-  const url = sanitizeEnvValue(process.env.SUPABASE_URL);
-  const key = sanitizeEnvValue(process.env.SUPABASE_ANON_KEY);
+function resolvePair(urlValue: string, keyValue: string, urlSource: string, keySource: string) {
+  if (looksLikePublishableKey(urlValue) && looksLikeUrl(keyValue)) {
+    console.warn("[supabase] swapped env values detected", {
+      urlSource,
+      keySource
+    });
 
-  validateSupabaseUrl(url, "SUPABASE_URL");
+    return {
+      url: keyValue,
+      key: urlValue
+    };
+  }
 
   return {
-    url,
-    key
+    url: urlValue,
+    key: keyValue
+  };
+}
+
+function resolveServerSupabaseEnv() {
+  const resolved = resolvePair(
+    sanitizeEnvValue(process.env.SUPABASE_URL),
+    sanitizeEnvValue(process.env.SUPABASE_ANON_KEY),
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY"
+  );
+
+  validateSupabaseUrl(resolved.url, "SUPABASE_URL");
+
+  return {
+    url: resolved.url,
+    key: resolved.key
   };
 }
 
 function resolveBrowserSupabaseEnv() {
-  const url = sanitizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_URL);
-  const key = sanitizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  const resolved = resolvePair(
+    sanitizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    sanitizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+  );
 
-  validateSupabaseUrl(url, "NEXT_PUBLIC_SUPABASE_URL");
+  validateSupabaseUrl(resolved.url, "NEXT_PUBLIC_SUPABASE_URL");
 
   return {
-    url,
-    key
+    url: resolved.url,
+    key: resolved.key
   };
 }
 
