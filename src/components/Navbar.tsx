@@ -24,7 +24,7 @@ export function Navbar() {
   return (
     <header className="site-header">
       <Container>
-        <nav className="navbar glass-panel">
+        <nav className="navbar">
           <Link href="/" className="brand-link" aria-label="AI Trend Auto Publisher dashboard">
             <span className="brand-mark">AI</span>
             <span className="brand-copy">

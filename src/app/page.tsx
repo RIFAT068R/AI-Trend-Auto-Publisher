@@ -4,9 +4,9 @@ import { Container } from "@/components/Container";
 import { generateImagePreview } from "@/lib/image";
 import { generatePostPreview } from "@/lib/ai";
 import { getStoredPosts, getSystemStatus } from "@/lib/storage";
-import { getAllTrends, getTopTrend } from "@/lib/trends";
+import { getAllTrends } from "@/lib/trends";
 
-function formatDate(value: string) {
+function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("en", {
     month: "short",
     day: "numeric",
@@ -15,188 +15,159 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).format(new Date(value));
+}
+
 export default async function HomePage() {
-  const [trends, topTrend, preview, image, systemStatus, posts] = await Promise.all([
+  const [trends, preview, image, systemStatus, posts] = await Promise.all([
     getAllTrends(),
-    getTopTrend(),
     generatePostPreview(),
     generateImagePreview(),
     getSystemStatus(),
     getStoredPosts()
   ]);
 
+  const readyToPost = posts.filter((post) => post.status === "draft" || post.status === "scheduled").length;
+  const lastPublished = posts.find((post) => post.status === "published");
+  const recentActivity = posts.slice(0, 4);
+
   const stats = [
     {
-      label: "Tracked trends",
+      label: "Trends Found",
       value: String(trends.length).padStart(2, "0"),
-      detail: "Fresh ranked topics"
+      detail: "Topics in the discovery queue"
     },
     {
-      label: "Queue items",
-      value: String(posts.length).padStart(2, "0"),
-      detail: "Saved publishing records"
+      label: "Ready to Post",
+      value: String(readyToPost).padStart(2, "0"),
+      detail: "Drafts and scheduled items"
     },
     {
-      label: "Top trend score",
-      value: String(topTrend.score),
-      detail: topTrend.category
+      label: "Last Published",
+      value: lastPublished ? formatDate(lastPublished.publishedAt) : "No posts",
+      detail: lastPublished ? lastPublished.channel : "Waiting for first publish"
     },
     {
-      label: "System health",
+      label: "System Status",
       value: systemStatus.overall,
-      detail: "Operational modules online"
+      detail: "Core services available"
     }
   ] as const;
-
-  const recentActivity = posts.slice(0, 4);
 
   return (
     <main className="page-shell">
       <Container>
-        <section className="page-header reveal-up">
+        <section className="page-header">
           <div className="page-header-copy">
-            <span className="section-kicker">Operations Dashboard</span>
-            <h1>AI Trend Auto Publisher</h1>
-            <p>
-              Monitor trend discovery, review generated content, and keep publishing workflows moving from one clean control surface.
-            </p>
+            <h1>Dashboard</h1>
+            <p>Track trends, review generated content, and manage the publishing workflow from one clean workspace.</p>
           </div>
+
           <div className="page-header-actions">
-            <div className="header-meta glass-subpanel">
-              <span className="micro-label">Last update</span>
-              <strong>{formatDate(systemStatus.updatedAt)}</strong>
-            </div>
-            <Button href="/api/test">Run API check</Button>
-            <Button href="/history" variant="secondary">
-              Open history
+            <Button href="/api/post" variant="secondary">
+              Run Pipeline
             </Button>
+            <Button href="/api/generate">Generate Post</Button>
           </div>
         </section>
 
-        <section className="stats-grid reveal-up delay-1">
+        <section className="stats-grid">
           {stats.map((stat) => (
-            <article key={stat.label} className="stat-card glass-panel">
-              <span className="micro-label">{stat.label}</span>
-              <strong>{stat.value}</strong>
-              <p>{stat.detail}</p>
+            <article key={stat.label} className="stat-card card-surface">
+              <span className="stat-label">{stat.label}</span>
+              <strong className="stat-value">{stat.value}</strong>
+              <p className="stat-detail">{stat.detail}</p>
             </article>
           ))}
         </section>
 
-        <section className="dashboard-layout reveal-up delay-1">
-          <Card
-            title="Trending Topics"
-            description="Topics with the strongest publishing potential right now."
-            eyebrow="Discovery"
-            className="panel-primary"
-            headerSlot={<span className="header-pill">Live feed</span>}
-          >
-            <div className="trend-list">
-              {trends.slice(0, 4).map((trend) => (
-                <article key={trend.id} className="trend-item">
-                  <div className="trend-main">
+        <section className="dashboard-grid-two">
+          <Card title="Trending Topics" description="Highest-priority topics to review next." className="dashboard-card">
+            <div className="list-stack">
+              {trends.slice(0, 5).map((trend) => (
+                <article key={trend.id} className="list-row trend-row">
+                  <div className="list-main">
                     <h3>{trend.title}</h3>
-                    <p>{trend.category}</p>
-                    <div className="inline-meta">
+                    <div className="row-meta">
                       <span>{trend.source}</span>
-                      <span>{formatDate(trend.publishedAt)}</span>
+                      <span>{formatDateTime(trend.publishedAt)}</span>
                     </div>
                   </div>
-                  <div className="trend-meta">
-                    <span className="score-pill">{trend.score}</span>
-                    <span className="micro-label">score</span>
-                  </div>
+                  <span className="score-badge">{trend.score}</span>
                 </article>
               ))}
             </div>
           </Card>
 
-          <Card
-            title="Generated Post Preview"
-            description="Draft output prepared for review, visuals, and scheduling."
-            eyebrow="AI Draft"
-            className="panel-secondary"
-            headerSlot={<span className="status-chip status-ready">Ready</span>}
-          >
-            <div className="preview-block">
-              <h3>{preview.title}</h3>
-              <p>{preview.summary}</p>
-              <div className="preview-cta glass-subpanel">
-                <span className="micro-label">Next action</span>
-                <strong>{preview.callToAction}</strong>
+          <Card title="Generated Post Preview" description="Current draft prepared by the content generation layer." className="dashboard-card">
+            <div className="preview-stack">
+              <div className="content-box subtle-surface">
+                <h3>{preview.title}</h3>
+                <p>{preview.summary}</p>
               </div>
-              <div className="keyword-row">
+
+              <div className="tag-row">
                 {preview.keywords.map((keyword) => (
-                  <span key={keyword} className="keyword-pill">
+                  <span key={keyword} className="tag-pill">
                     {keyword}
                   </span>
                 ))}
               </div>
-              <div className="preview-image glass-subpanel">
-                <div>
-                  <span className="micro-label">Image prompt</span>
-                  <p>{image.prompt}</p>
-                </div>
-                <span className="image-tag">Visual queued</span>
+
+              <div className="info-panel">
+                <span className="info-label">Next action</span>
+                <strong>{preview.callToAction}</strong>
+              </div>
+
+              <div className="info-panel">
+                <span className="info-label">Image prompt</span>
+                <p>{image.prompt}</p>
               </div>
             </div>
           </Card>
+        </section>
 
-          <Card
-            title="System Status"
-            description="Readiness across discovery, generation, visuals, and publishing."
-            eyebrow="Infrastructure"
-            className="panel-wide"
-          >
-            <div className="system-stack">
-              <div className="system-summary glass-subpanel">
-                <div>
-                  <span className="micro-label">Overall state</span>
-                  <strong>{systemStatus.overall}</strong>
-                </div>
-                <time dateTime={systemStatus.updatedAt}>{formatDate(systemStatus.updatedAt)}</time>
-              </div>
-              <div className="module-table">
-                {systemStatus.modules.map((module) => (
-                  <div key={module.name} className="module-row">
-                    <div>
-                      <h3>{module.name}</h3>
-                      <p>{module.detail}</p>
-                    </div>
-                    <span className={`status-chip status-${module.status}`}>{module.status}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
-
-          <Card
-            title="Recent Activity"
-            description="Latest publishing records and queued items from local storage."
-            eyebrow="Publishing Queue"
-            className="panel-wide"
-            headerSlot={<span className="header-pill">{recentActivity.length} items</span>}
-          >
-            <div className="activity-list">
+        <section className="dashboard-grid-two dashboard-grid-bottom">
+          <Card title="Recent Activity" description="Latest items from the publishing queue." className="dashboard-card">
+            <div className="list-stack">
               {recentActivity.map((post) => (
-                <article key={post.id} className="activity-row">
-                  <div>
+                <article key={post.id} className="list-row activity-row">
+                  <div className="list-main">
                     <h3>{post.title}</h3>
-                    <p>{post.topic}</p>
+                    <div className="row-meta">
+                      <span>{post.channel}</span>
+                      <span>{formatDate(post.publishedAt)}</span>
+                    </div>
                   </div>
-                  <div className="activity-meta">
-                    <span>{post.channel}</span>
-                    <span>{formatDate(post.publishedAt)}</span>
-                    <span className={`status-chip status-${post.status}`}>{post.status}</span>
-                  </div>
+                  <span className={`status-badge status-${post.status}`}>{post.status}</span>
                 </article>
               ))}
+
               {recentActivity.length === 0 ? (
-                <div className="empty-state glass-subpanel">
-                  <strong>No activity yet</strong>
-                  <p>Publishing records will appear here as soon as new posts are generated or scheduled.</p>
+                <div className="empty-state">
+                  <strong>No recent activity</strong>
+                  <p>Publishing events will appear here once new posts are generated or scheduled.</p>
                 </div>
               ) : null}
+            </div>
+          </Card>
+
+          <Card title="System Status" description="Current operational state across the automation pipeline." className="dashboard-card">
+            <div className="list-stack">
+              {systemStatus.modules.map((module) => (
+                <article key={module.name} className="list-row status-row">
+                  <div className="list-main">
+                    <h3>{module.name}</h3>
+                    <p>{module.detail}</p>
+                  </div>
+                  <span className={`status-badge status-${module.status}`}>{module.status}</span>
+                </article>
+              ))}
             </div>
           </Card>
         </section>

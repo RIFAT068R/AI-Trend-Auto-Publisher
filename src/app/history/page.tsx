@@ -16,64 +16,49 @@ export default async function HistoryPage() {
   return (
     <main className="page-shell">
       <Container>
-        <section className="page-header reveal-up page-header-compact">
+        <section className="page-header page-header-compact">
           <div className="page-header-copy">
-            <span className="section-kicker">Archive</span>
-            <h1>Publishing History</h1>
-            <p>Review previous outputs, scheduling state, and publishing sources from the current local history store.</p>
-          </div>
-          <div className="page-header-actions">
-            <div className="header-meta glass-subpanel">
-              <span className="micro-label">Stored records</span>
-              <strong>{String(posts.length).padStart(2, "0")}</strong>
-            </div>
+            <h1>History</h1>
+            <p>Review previous posts, publishing status, and distribution sources in one simple view.</p>
           </div>
         </section>
 
         {posts.length === 0 ? (
-          <section className="reveal-up delay-1">
-            <Card title="No publishing history yet" description="Create or queue a post to populate this archive." eyebrow="Empty state">
-              <div className="empty-state glass-subpanel">
-                <strong>No posts recorded</strong>
-                <p>The history table will automatically fill as new content moves through the publishing workflow.</p>
-              </div>
-            </Card>
-          </section>
+          <Card title="No posts yet" description="Your publishing history will appear here once the first item is created.">
+            <div className="empty-state">
+              <strong>No publishing history available</strong>
+              <p>Generate and publish a post to start building the archive.</p>
+            </div>
+          </Card>
         ) : (
-          <section className="history-table-shell reveal-up delay-1">
-            <Card
-              title="Previous Posts"
-              description="A clean operational view of recent publishing records."
-              eyebrow="History"
-              className="history-table-card"
-            >
-              <div className="history-table history-table-head">
-                <span>Title</span>
-                <span>Status</span>
-                <span>Date</span>
-                <span>Source</span>
-              </div>
-              <div className="history-table-body">
-                {posts.map((post) => (
-                  <article key={post.id} className="history-table-row">
-                    <div className="history-cell history-title-cell">
-                      <strong>{post.title}</strong>
-                      <span>{post.topic}</span>
-                    </div>
-                    <div className="history-cell" data-label="Status">
-                      <span className={`status-chip status-${post.status}`}>{post.status}</span>
-                    </div>
-                    <div className="history-cell" data-label="Date">
-                      <strong>{formatDate(post.publishedAt)}</strong>
-                    </div>
-                    <div className="history-cell" data-label="Source">
-                      <strong>{post.channel}</strong>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </Card>
-          </section>
+          <Card title="Previous Posts" description="A clean view of the latest publishing records." className="history-card-shell">
+            <div className="history-table history-table-head">
+              <span>Title</span>
+              <span>Status</span>
+              <span>Date</span>
+              <span>Source</span>
+            </div>
+
+            <div className="history-table-body">
+              {posts.map((post) => (
+                <article key={post.id} className="history-table-row">
+                  <div className="history-cell history-title-cell" data-label="Title">
+                    <strong>{post.title}</strong>
+                    <span>{post.topic}</span>
+                  </div>
+                  <div className="history-cell" data-label="Status">
+                    <span className={`status-badge status-${post.status}`}>{post.status}</span>
+                  </div>
+                  <div className="history-cell" data-label="Date">
+                    <strong>{formatDate(post.publishedAt)}</strong>
+                  </div>
+                  <div className="history-cell" data-label="Source">
+                    <strong>{post.channel}</strong>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </Card>
         )}
       </Container>
     </main>

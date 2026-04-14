@@ -9,7 +9,7 @@ type CardProps = Readonly<{
 
 export function Card({ title, description, eyebrow, className, headerSlot, children }: CardProps) {
   return (
-    <section className={`card glass-panel ${className ?? ""}`.trim()}>
+    <section className={`card card-surface ${className ?? ""}`.trim()}>
       <div className="card-header">
         <div className="card-copy">
           {eyebrow ? <span className="card-eyebrow">{eyebrow}</span> : null}
