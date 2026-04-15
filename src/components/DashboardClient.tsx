@@ -141,10 +141,18 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
 
       setPreview({
         hook: payload.data.preview.hook,
+        subheadline: payload.data.preview.subheadline,
         caption: payload.data.preview.caption,
         hashtags: payload.data.preview.hashtags,
         category: payload.data.preview.category,
-        imagePrompt: payload.data.preview.imagePrompt
+        imagePrompt: payload.data.preview.imagePrompt,
+        posterConcept: payload.data.preview.posterConcept,
+        visualAngle: payload.data.preview.visualAngle,
+        mainSubject: payload.data.preview.mainSubject,
+        compositionStyle: payload.data.preview.compositionStyle,
+        headlineLayout: payload.data.preview.headlineLayout,
+        colorMood: payload.data.preview.colorMood,
+        designStyle: payload.data.preview.designStyle
       });
       setPreviewImage(payload.data.image);
       setPosts((currentPosts) => [payload.data.post, ...currentPosts]);
@@ -238,9 +246,36 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
         <Card title="Generated Post Preview" description="Latest generated metadata ready for image and draft storage." className="dashboard-card">
           {latestPreview ? (
             <div className="preview-stack">
+              <div className="poster-meta-grid">
+                <div className="info-panel">
+                  <span className="info-label">Poster concept</span>
+                  <strong>{latestPreview.posterConcept}</strong>
+                </div>
+
+                <div className="info-panel">
+                  <span className="info-label">Main subject</span>
+                  <strong>{latestPreview.mainSubject}</strong>
+                </div>
+
+                <div className="info-panel">
+                  <span className="info-label">Template</span>
+                  <strong>{latestPreview.compositionStyle}</strong>
+                </div>
+
+                <div className="info-panel">
+                  <span className="info-label">Visual angle</span>
+                  <p>{latestPreview.visualAngle}</p>
+                </div>
+              </div>
+
               <div className="info-panel">
                 <span className="info-label">Hook</span>
                 <strong>{latestPreview.hook}</strong>
+              </div>
+
+              <div className="info-panel">
+                <span className="info-label">Subheadline</span>
+                <p>{latestPreview.subheadline}</p>
               </div>
 
               <div className="info-panel">
@@ -261,6 +296,23 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
                 <strong>{latestPreview.category}</strong>
               </div>
 
+              <div className="poster-meta-grid">
+                <div className="info-panel">
+                  <span className="info-label">Headline layout</span>
+                  <strong>{latestPreview.headlineLayout}</strong>
+                </div>
+
+                <div className="info-panel">
+                  <span className="info-label">Color mood</span>
+                  <strong>{latestPreview.colorMood}</strong>
+                </div>
+
+                <div className="info-panel">
+                  <span className="info-label">Design style</span>
+                  <strong>{latestPreview.designStyle}</strong>
+                </div>
+              </div>
+
               <div className="info-panel">
                 <span className="info-label">Image prompt</span>
                 <p>{latestPreview.imagePrompt}</p>
@@ -272,7 +324,12 @@ export function DashboardClient({ initialTrends, initialPosts, initialSystemStat
                   <Poster
                     imageUrl={previewImage.imageUrl}
                     hook={latestPreview.hook}
+                    subheadline={latestPreview.subheadline}
                     category={latestPreview.category}
+                    template={latestPreview.compositionStyle}
+                    headlineLayout={latestPreview.headlineLayout}
+                    colorMood={latestPreview.colorMood}
+                    designStyle={latestPreview.designStyle}
                     alt={previewImage.alt}
                     className="preview-poster"
                   />

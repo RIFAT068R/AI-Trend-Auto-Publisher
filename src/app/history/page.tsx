@@ -52,6 +52,7 @@ export default async function HistoryPage() {
                       <Poster
                         imageUrl={post.imageUrl}
                         hook={post.hook}
+                        subheadline={post.caption}
                         category={post.category}
                         alt={post.title}
                         className="history-poster"

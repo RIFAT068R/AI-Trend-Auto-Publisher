@@ -29,21 +29,41 @@ export type GeneratedPostPreview = {
   title: string;
   summary: string;
   hook: string;
+  subheadline: string;
   caption: string;
   hashtags: string[];
   category: string;
   imagePrompt: string;
+  posterConcept: string;
+  visualAngle: string;
+  mainSubject: string;
+  compositionStyle: PosterTemplate;
+  headlineLayout: HeadlineLayout;
+  colorMood: string;
+  designStyle: string;
   tags: string[];
   callToAction: string;
 };
 
 export type GeneratedMetadata = {
   hook: string;
+  subheadline: string;
   caption: string;
   hashtags: string[];
   category: string;
   imagePrompt: string;
+  posterConcept: string;
+  visualAngle: string;
+  mainSubject: string;
+  compositionStyle: PosterTemplate;
+  headlineLayout: HeadlineLayout;
+  colorMood: string;
+  designStyle: string;
 };
+
+export type PosterTemplate = "template-a" | "template-b" | "template-c" | "template-d";
+
+export type HeadlineLayout = "top-left" | "center-left" | "top-center";
 
 export type GeneratedImagePreview = {
   prompt: string;

@@ -443,26 +443,6 @@ img {
   letter-spacing: -0.01em;
 }
 
-.preview-image-display,
-.history-image-thumb {
-  width: 100%;
-  max-width: 320px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: var(--bg-muted);
-  object-fit: cover;
-}
-
-.preview-image-display {
-  margin-top: 4px;
-}
-
-.history-image-thumb {
-  margin-top: 8px;
-  max-width: 140px;
-  aspect-ratio: 1 / 1;
-}
-
 .poster-shell {
   position: relative;
   overflow: hidden;
@@ -504,6 +484,19 @@ img {
     linear-gradient(180deg, rgba(2, 6, 23, 0.28) 0%, rgba(2, 6, 23, 0.06) 35%, rgba(2, 6, 23, 0.58) 100%);
 }
 
+.poster-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 38%, rgba(2, 6, 23, 0.32) 100%);
+}
+
+.poster-spotlight {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 82% 26%, rgba(255, 255, 255, 0.16), transparent 34%);
+  mix-blend-mode: screen;
+}
+
 .poster-noise {
   opacity: 0.2;
   background-image:
@@ -523,6 +516,17 @@ img {
   gap: 18px;
 }
 
+.poster-topline,
+.poster-copy {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+
+.poster-copy {
+  max-width: 62%;
+}
+
 .poster-badge {
   display: inline-flex;
   align-items: center;
@@ -539,19 +543,52 @@ img {
   text-transform: uppercase;
 }
 
+.poster-style-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
 .poster-hook {
-  max-width: min(62%, 11ch);
   margin: 0;
   color: #fff;
   font-size: clamp(1.6rem, 4.6vw, 3.25rem);
   font-weight: 700;
-  line-height: 0.96;
+  line-height: 0.92;
   letter-spacing: -0.06em;
-  text-wrap: balance;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
+  display: grid;
+  gap: 0.04em;
+}
+
+.poster-hook.lines-3 {
+  font-size: clamp(1.45rem, 4vw, 2.7rem);
+}
+
+.poster-hook.lines-4 {
+  font-size: clamp(1.2rem, 3.2vw, 2.2rem);
+  line-height: 0.98;
+}
+
+.poster-hook-line {
+  display: block;
+}
+
+.poster-subheadline {
+  margin: 0;
+  max-width: 90%;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: clamp(0.84rem, 1.8vw, 1rem);
+  line-height: 1.35;
+  letter-spacing: -0.02em;
 }
 
 .preview-poster {
@@ -575,6 +612,10 @@ img {
   gap: 8px;
 }
 
+.history-poster .poster-copy {
+  max-width: 78%;
+}
+
 .history-poster .poster-badge {
   min-height: 22px;
   padding: 0 8px;
@@ -582,8 +623,82 @@ img {
 }
 
 .history-poster .poster-hook {
-  max-width: 70%;
   font-size: 0.95rem;
+}
+
+.history-poster .poster-style-chip,
+.history-poster .poster-subheadline {
+  display: none;
+}
+
+.poster-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.template-b .poster-content {
+  align-items: center;
+  text-align: center;
+}
+
+.template-b .poster-copy {
+  max-width: 82%;
+}
+
+.template-b .poster-overlay {
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.4) 0%, rgba(2, 6, 23, 0.2) 28%, rgba(2, 6, 23, 0.74) 100%),
+    radial-gradient(circle at center, transparent 24%, rgba(2, 6, 23, 0.68) 100%);
+}
+
+.template-c .poster-overlay {
+  background:
+    linear-gradient(110deg, rgba(2, 6, 23, 0.94) 0%, rgba(2, 6, 23, 0.76) 36%, rgba(2, 6, 23, 0.18) 68%, rgba(2, 6, 23, 0.16) 100%),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.2) 0%, rgba(2, 6, 23, 0.66) 100%);
+}
+
+.template-d .poster-overlay {
+  background:
+    linear-gradient(120deg, rgba(2, 6, 23, 0.92) 0%, rgba(2, 6, 23, 0.72) 34%, rgba(2, 6, 23, 0.12) 72%, rgba(2, 6, 23, 0.16) 100%),
+    radial-gradient(circle at 80% 26%, rgba(96, 165, 250, 0.22), transparent 26%);
+}
+
+.top-center .poster-content {
+  align-items: center;
+  text-align: center;
+}
+
+.top-center .poster-copy {
+  max-width: 78%;
+}
+
+.center-left .poster-content {
+  justify-content: center;
+}
+
+.mood-blue-tech {
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.24), transparent 36%),
+    linear-gradient(145deg, #0f172a, #020617);
+}
+
+.mood-purple-glow {
+  background:
+    radial-gradient(circle at top right, rgba(168, 85, 247, 0.26), transparent 34%),
+    linear-gradient(145deg, #140b2e, #090510);
+}
+
+.mood-clean-white {
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 28%),
+    linear-gradient(145deg, #475569, #0f172a);
+}
+
+.mood-security-red {
+  background:
+    radial-gradient(circle at top right, rgba(248, 113, 113, 0.22), transparent 30%),
+    linear-gradient(145deg, #2a0d0d, #0f172a);
 }
 
 .empty-state {
@@ -733,8 +848,17 @@ img {
   }
 
   .poster-hook {
-    max-width: 72%;
     font-size: clamp(1.5rem, 8vw, 2.45rem);
+  }
+
+  .poster-copy,
+  .template-b .poster-copy,
+  .top-center .poster-copy {
+    max-width: 88%;
+  }
+
+  .poster-meta-grid {
+    grid-template-columns: 1fr;
   }
 }
 
