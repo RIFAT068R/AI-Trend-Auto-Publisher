@@ -1,8 +1,25 @@
 import type { GeneratedImagePreview } from "@/lib/types";
 
-function enhanceImagePrompt(imagePrompt?: string) {
-  const basePrompt = imagePrompt?.trim() || "futuristic AI technology background";
-  return `${basePrompt}, futuristic tech style, clean composition, subject on right side, empty space on left for text, no text, minimal dark background, cinematic lighting, high contrast, premium poster aesthetic`;
+function buildCloudflarePrompt(imagePrompt?: string) {
+  const basePrompt = imagePrompt?.trim() || "premium technology poster visual";
+
+  return [
+    "premium advertising poster",
+    "modern tech campaign visual",
+    basePrompt,
+    "one strong focal subject",
+    "clean composition",
+    "subject placement designed for headline space",
+    "empty space reserved for text overlay",
+    "cinematic lighting",
+    "professional product-ad composition",
+    "high contrast",
+    "premium detail",
+    "no text",
+    "no watermark",
+    "no clutter",
+    "no collage"
+  ].join(", ");
 }
 
 function toDataUrl(base64: string) {
@@ -10,7 +27,7 @@ function toDataUrl(base64: string) {
 }
 
 export async function generateImagePreview(imagePrompt?: string): Promise<GeneratedImagePreview> {
-  const prompt = enhanceImagePrompt(imagePrompt);
+  const prompt = buildCloudflarePrompt(imagePrompt);
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
   const apiToken = process.env.CLOUDFLARE_API_TOKEN;
 

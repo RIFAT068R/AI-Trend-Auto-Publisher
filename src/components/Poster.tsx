@@ -50,6 +50,7 @@ export function Poster({ imageUrl, hook, subheadline, category, template = "temp
       <div className="poster-overlay" />
       <div className="poster-vignette" aria-hidden="true" />
       <div className="poster-spotlight" aria-hidden="true" />
+      <div className="poster-safe-zone" aria-hidden="true" />
       <div className="poster-noise" aria-hidden="true" />
       <div className="poster-content">
         <div className="poster-topline">

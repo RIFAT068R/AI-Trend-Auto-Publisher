@@ -490,6 +490,12 @@ img {
   background: radial-gradient(circle at center, transparent 38%, rgba(2, 6, 23, 0.32) 100%);
 }
 
+.poster-safe-zone {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(2, 6, 23, 0.52) 0%, rgba(2, 6, 23, 0.34) 30%, transparent 62%);
+}
+
 .poster-spotlight {
   position: absolute;
   inset: 0;
@@ -524,7 +530,7 @@ img {
 }
 
 .poster-copy {
-  max-width: 62%;
+  max-width: 58%;
 }
 
 .poster-badge {
@@ -561,12 +567,12 @@ img {
 .poster-hook {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.6rem, 4.6vw, 3.25rem);
-  font-weight: 700;
-  line-height: 0.92;
+  font-size: clamp(1.7rem, 4.8vw, 3.45rem);
+  font-weight: 800;
+  line-height: 0.9;
   letter-spacing: -0.06em;
   display: grid;
-  gap: 0.04em;
+  gap: 0.06em;
 }
 
 .poster-hook.lines-3 {
@@ -585,9 +591,9 @@ img {
 .poster-subheadline {
   margin: 0;
   max-width: 90%;
-  color: rgba(255, 255, 255, 0.86);
-  font-size: clamp(0.84rem, 1.8vw, 1rem);
-  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(0.86rem, 1.9vw, 1rem);
+  line-height: 1.42;
   letter-spacing: -0.02em;
 }
 
@@ -637,6 +643,10 @@ img {
   gap: 12px;
 }
 
+.preview-stack .poster-meta-grid:last-of-type {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .template-b .poster-content {
   align-items: center;
   text-align: center;
@@ -662,6 +672,12 @@ img {
   background:
     linear-gradient(120deg, rgba(2, 6, 23, 0.92) 0%, rgba(2, 6, 23, 0.72) 34%, rgba(2, 6, 23, 0.12) 72%, rgba(2, 6, 23, 0.16) 100%),
     radial-gradient(circle at 80% 26%, rgba(96, 165, 250, 0.22), transparent 26%);
+}
+
+.template-d .poster-spotlight {
+  background:
+    radial-gradient(circle at 78% 32%, rgba(255, 255, 255, 0.2), transparent 22%),
+    radial-gradient(circle at 72% 48%, rgba(96, 165, 250, 0.16), transparent 30%);
 }
 
 .top-center .poster-content {
